@@ -1453,19 +1453,27 @@ SENTRY_AUTH_TOKEN=...
   "crons": [
     {
       "path": "/api/cron/daily-missions",
-      "schedule": "5 * * * *"
+      "schedule": "5 */1 * * *"
     },
     {
       "path": "/api/cron/expire-tasks",
-      "schedule": "0 * * * *"
+      "schedule": "0 */1 * * *"
+    },
+    {
+      "path": "/api/cron/recurring-tasks",
+      "schedule": "1 */1 * * *"
     },
     {
       "path": "/api/cron/ranking-snapshot",
-      "schedule": "0 * * * *"
+      "schedule": "30 */1 * * *"
     },
     {
       "path": "/api/cron/weekly-report",
-      "schedule": "0 23 * * 0"
+      "schedule": "0 */1 * * 0"
+    },
+    {
+      "path": "/api/cron/proactive-alerts",
+      "schedule": "0 */6 * * *"
     },
     {
       "path": "/api/cron/cleanup-deleted-users",
@@ -1479,7 +1487,50 @@ SENTRY_AUTH_TOKEN=...
 }
 ```
 
-Cada endpoint CRON é protegido por validação do header `Authorization: Bearer {CRON_SECRET}`.
+**Detalhamento dos CRON Jobs:**
+
+| Job | Schedule | Lógica de Execução |
+|-----|----------|--------------------|
+| `daily-missions` | A cada hora (min 5) | Roda a cada hora e filtra usuários cujo fuso horário acabou de passar das 00:05. Ex: quando o CRON executa às 03:05 UTC, processa apenas usuários com timezone UTC-3 (onde são 00:05 local). Garante que cada usuário recebe missões à meia-noite do seu fuso, sem necessidade de agendar CRONs por timezone. |
+| `expire-tasks` | A cada hora (min 0) | Identifica tarefas com `status='pending'` e `due_date < NOW()` e marca como `'expired'`. Roda a cada hora para cobrir todos os fusos horários sem atraso perceptível. |
+| `recurring-tasks` | A cada hora (min 1) | Gera novas instâncias de tarefas recorrentes para usuários cujo fuso horário acabou de virar meia-noite (mesma lógica de timezone do `daily-missions`). Marca instâncias anteriores não completadas como expiradas. [UC-028] |
+| `ranking-snapshot` | A cada hora (min 30) | Recalcula snapshots de ranking semanal e global. Executado meia hora após os outros para garantir que XP recente já foi processado. [RN-RANK-03] |
+| `weekly-report` | A cada hora aos domingos | Roda a cada hora no domingo e filtra usuários cujo fuso horário corresponde a 23:00 local. Gera relatório semanal por IA para planos Starter+. [RN-IA05] |
+| `proactive-alerts` | A cada 6 horas | Analisa padrões negativos (inatividade 3+ dias, streak em risco, pilar negligenciado) e envia alertas por email/in-app para planos Starter+. Frequência menor para evitar spam. [UC-063] |
+| `cleanup-deleted-users` | Diário às 03:00 UTC | Executa `hard_delete_user()` para contas com `deletion_requested_at` há mais de 30 dias. Horário de baixo tráfego. [UC-006, LGPD-003] |
+| `anonymize-old-logs` | Semanal (segunda 04:00 UTC) | Anonimiza registros de `audit_log` e `ai_interactions` com mais de 90 dias. Remove IP e user_agent. [SEC-010] |
+
+**Padrão de timezone nos CRONs horários:**
+
+```typescript
+// Lógica reutilizada por daily-missions, recurring-tasks e weekly-report
+// Exemplo: /api/cron/daily-missions/route.ts
+
+export async function POST(req: Request) {
+  // 1. Validar CRON_SECRET
+  validateCronSecret(req);
+
+  // 2. Calcular qual timezone acabou de passar das 00:05
+  const now = new Date();
+  const targetLocalHour = 0;
+  const targetLocalMinute = 5;
+
+  // Buscar usuários cujo fuso horário corresponde ao horário-alvo
+  // Ex: se agora é 03:05 UTC → processa timezone 'America/Sao_Paulo' (UTC-3)
+  const { data: users } = await supabaseAdmin
+    .from('users')
+    .select('id, timezone')
+    .eq('onboarding_completed', true)
+    .filter('timezone', 'in', getTimezonesAtLocalTime(now, targetLocalHour, targetLocalMinute));
+
+  // 3. Processar geração de missões para cada usuário
+  for (const user of users) {
+    await generateDailyMissions(user.id);
+  }
+}
+```
+
+Cada endpoint CRON é protegido por validação do header `Authorization: Bearer {CRON_SECRET}`. O Vercel injeta este header automaticamente nas chamadas de CRON configuradas.
 
 ---
 
