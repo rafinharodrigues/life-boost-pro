@@ -101,6 +101,12 @@ Cada categoria funciona como um "atributo" do personagem do usuário, com progre
 - Representa a "evolução total" do usuário
 - Desbloqueios visuais acontecem por nível geral
 
+### 3.6 Diário de Reflexão / Journaling
+
+- O usuário pode registrar reflexões diárias vinculadas a qualquer pilar
+- A IA analisa padrões emocionais e de produtividade ao longo do tempo
+- Entradas do diário alimentam o contexto do Mentor IA para coaching mais preciso
+
 ---
 
 ## 4. Sistema de Gamificação
@@ -157,6 +163,34 @@ XP_necessário(n) = 100 * n^1.5
 | Ranking entre Amigos | Competição entre pessoas que se seguem |
 | Anti-cheating | IA valida consistência das atividades reportadas |
 
+### 4.5 Loja de Recompensas (Shop)
+
+- Moedas de Ouro ganhas ao completar tarefas e conquistas
+- Loja dividida em: Equipamentos de Avatar, Skins, Efeitos Visuais, Temas de Interface
+- Auto-recompensas personalizáveis: o usuário cria suas próprias recompensas (ex: "Assistir filme" = 100 moedas)
+- Itens sazonais e limitados para criar urgência e colecionismo
+- Loot boxes com drop rates transparentes (não gambling — o usuário sabe as chances)
+
+### 4.6 Sistema de Guildas e Desafios em Grupo
+
+- Guildas: grupos de 5-20 jogadores com objetivos compartilhados
+- Party Quests: desafios cooperativos onde o progresso individual contribui para o grupo
+- Desafios comunitários: metas coletivas (ex: "Comunidade: 10.000 tarefas esta semana")
+- Guild Chat e feed de atividades
+- Ranking entre guildas
+
+### 4.7 Desafios Temáticos e Eventos Sazonais
+
+- Desafios de 7, 14, 21 dias com temas ("Semana do Foco", "Desafio 21 Dias de Saúde")
+- Eventos sazonais com conquistas e itens exclusivos (Ano Novo, Verão, etc.)
+- Desafios IA personalizados baseados em áreas fracas do usuário
+
+### 4.8 Sistema de Títulos
+
+- Títulos desbloqueáveis exibidos no perfil (ex: "Mestre da Saúde", "Sábio Financeiro", "Lenda Viva")
+- Baseados em conquistas de longo prazo, não apenas nível
+- Títulos raros e secretos para incentivar exploração
+
 ---
 
 ## 5. Sistema de IA
@@ -193,6 +227,16 @@ A IA atua como um "NPC guia" dentro do jogo. Ela conhece o perfil, histórico e 
 
 *Valores estimados, dependem do volume de tokens por chamada.*
 
+### 5.4 Análise Diária IA (Daily Briefing)
+
+- Toda manhã a IA gera um briefing personalizado com:
+  - Análise do estado atual do usuário (baseada em dados dos últimos 7 dias)
+  - Score de equilíbrio entre pilares (radar chart data)
+  - Frase motivacional contextualizada
+  - Top 3 prioridades sugeridas para o dia
+  - Alertas inteligentes (streak em risco, pilar negligenciado, prazo se aproximando)
+  - Previsão: "Se mantiver este ritmo, você atinge Nível 15 em ~12 dias"
+
 ---
 
 ## 6. Funcionalidades por Release
@@ -214,6 +258,11 @@ A IA atua como um "NPC guia" dentro do jogo. Ela conhece o perfil, histórico e 
 - Perfil do usuário com avatar e stats
 - Design dark/neon responsivo
 - Landing page com conversão para cadastro
+- Dashboard rico com gráfico radar de pilares, heatmap de atividade, briefing IA diário
+- Diário de reflexão (journaling básico)
+- Loja de recompensas (auto-recompensas customizáveis)
+- Landing page com quiz de segmentação e recomendação de plano
+- Página de analytics/insights com histórico detalhado
 
 **Não inclui no MVP:**
 
@@ -231,6 +280,11 @@ A IA atua como um "NPC guia" dentro do jogo. Ela conhece o perfil, histórico e 
 - Planos pagos com pagamento (Stripe) — Starter, Boost, Ultra
 - Relatórios semanais por IA mais detalhados
 - Notificações por email
+- Sistema de Guildas e Party Quests
+- Desafios temáticos e eventos sazonais
+- Sistema de títulos
+- Loja com itens de avatar e skins
+- Timeline de progresso / "Year in Review"
 
 ### 6.3 v1.2 — Comunidade
 
@@ -246,6 +300,20 @@ A IA atua como um "NPC guia" dentro do jogo. Ela conhece o perfil, histórico e 
 - Push notifications
 - Widget na tela inicial do celular
 - Sync completo com a versão web
+
+### 6.5 Novas Páginas do Produto
+
+**Páginas adicionais planejadas:**
+
+| Página | Descrição | Release |
+|--------|-----------|---------|
+| Analytics/Insights | Dashboard analítico com gráficos detalhados, tendências, comparações semanais | MVP |
+| Diário/Journal | Registro de reflexões diárias com análise de sentimento por IA | MVP |
+| Loja (Shop) | Loja de itens de avatar, auto-recompensas, itens sazonais | MVP (básico) |
+| Guildas | Criação/busca de guildas, party quests, chat, ranking de guildas | v1.1 |
+| Desafios | Desafios temáticos, eventos sazonais, progresso de desafio ativo | v1.1 |
+| Timeline | Linha do tempo de toda a evolução do usuário, marcos, conquistas | v1.1 |
+| Quiz de Segmentação | Quiz na landing page que recomenda plano ideal baseado no perfil | MVP |
 
 ---
 

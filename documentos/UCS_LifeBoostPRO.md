@@ -84,6 +84,10 @@ Este documento especifica todos os casos de uso do sistema Life Boost PRO, detal
 | PKG-PAY | UC-080 a UC-087 | Usuário / Stripe |
 | PKG-PROF | UC-090 a UC-095 | Usuário |
 | PKG-LAND | UC-100 a UC-102 | Visitante |
+| PKG-ANAL | UC-120 a UC-121 | Usuário / Sistema |
+| PKG-JOUR | UC-130 a UC-131 | Usuário |
+| PKG-SHOP | UC-140 | Usuário |
+| PKG-QUIZ | UC-150 | Visitante |
 | PKG-ADMIN | UC-110 a UC-113 | Administrador |
 
 ---
@@ -1584,6 +1588,213 @@ Este documento especifica todos os casos de uso do sistema Life Boost PRO, detal
 
 ---
 
+### PKG-ANAL — Analytics e Insights
+
+---
+
+#### UC-120: Visualizar Analytics Detalhado
+
+**Prioridade:** P1 — Essencial
+**Ator Primário:** Usuário
+**Rastreabilidade:** [ANAL-001] a [ANAL-010]
+**Trigger:** Usuário acessa tela "Analytics" ou "Insights"
+
+**Pré-condições:**
+- PC-01: Usuário está autenticado
+
+**Fluxo Principal:**
+1. Sistema carrega dados do período selecionado (padrão: 30 dias)
+2. Sistema exibe 4 KPI cards no topo: XP total no período, tarefas concluídas, taxa de conclusão (%), streak atual
+3. Sistema exibe gráfico de linha com XP por semana — 4 linhas coloridas por pilar + 1 linha de total
+4. Sistema exibe lado a lado: gráfico radar dos 4 pilares (valores 0-10 baseados no nível relativo) + donut chart de distribuição de tarefas por pilar
+5. Sistema exibe heatmap de atividade estilo GitHub — cada célula = 1 dia, cor = intensidade de XP
+6. Sistema exibe card de insights IA com padrões detectados ("Seu melhor dia é terça-feira", "Você é 40% mais produtivo de manhã")
+7. Sistema exibe tabela comparativa: esta semana vs anterior, este mês vs anterior, com setas ↑↓ e percentuais
+
+**Fluxos Alternativos:**
+
+*FA-01: Seleção de período*
+- Usuário clica em tabs: 7d | 30d | 90d | 6m | 1 ano
+- Todos os gráficos e KPIs recalculam para o período selecionado
+- Período limitado conforme plano [RN-ANAL-01]
+
+*FA-02: Plano Free (dados limitados)*
+- Gráficos mostram apenas últimos 7 dias
+- Heatmap mostra 7 dias com restante borrado + CTA de upgrade
+- Radar chart visível para todos (incentivo visual)
+
+**Pós-condição (sucesso):** Analytics exibido com dados do período selecionado
+
+---
+
+#### UC-121: Visualizar Briefing Diário IA
+
+**Prioridade:** P0 — Crítico
+**Ator Primário:** Usuário / Sistema (CRON)
+**Atores Secundários:** API Anthropic
+**Rastreabilidade:** [BRIEF-001] a [BRIEF-007]
+**Trigger:** Usuário acessa dashboard pela primeira vez no dia
+
+**Pré-condições:**
+- PC-01: Usuário está autenticado
+- PC-02: Briefing do dia ainda não foi gerado OU foi gerado pelo CRON
+
+**Fluxo Principal:**
+1. Sistema verifica se briefing do dia existe no cache
+2. Se não existe: sistema compila contexto (últimos 7 dias) e chama API Anthropic
+3. API retorna JSON com: greeting, analysis, motivational_phrase, alerts[], priorities[], level_prediction
+4. Sistema valida e sanitiza resposta
+5. Sistema cacheia briefing até meia-noite do fuso do usuário
+6. Sistema renderiza card hero no topo do dashboard com:
+   - Saudação personalizada + análise contextual
+   - Frase motivacional em destaque (fonte maior, com aspas estilizadas)
+   - Até 3 alertas (ícones: streak em risco, pilar fraco, prazo próximo)
+   - Top 3 prioridades sugeridas para o dia
+   - Previsão: "Se mantiver este ritmo, Nível X em ~Y dias"
+7. Badge "IA" visível no canto do card
+
+**Fluxos Alternativos:**
+
+*FA-01: API indisponível*
+- Sistema exibe briefing template estático com dados calculados localmente
+- Saudação genérica + alertas baseados em regras (sem IA)
+- Frase motivacional de banco estático
+
+*FA-02: Briefing já gerado (retorno ao dashboard)*
+- Sistema exibe briefing cacheado instantaneamente
+
+**Pós-condição (sucesso):** Briefing do dia exibido no dashboard
+
+---
+
+### PKG-JOUR — Diário/Journal
+
+---
+
+#### UC-130: Criar Entrada no Diário
+
+**Prioridade:** P1 — Essencial
+**Ator Primário:** Usuário
+**Rastreabilidade:** [JOUR-001], [JOUR-002], [JOUR-006], [JOUR-007]
+**Trigger:** Usuário clica em "Nova entrada" na tela de Diário
+
+**Pré-condições:**
+- PC-01: Usuário está autenticado
+
+**Fluxo Principal:**
+1. Sistema exibe formulário de entrada com:
+   - Seletor de humor (5 emojis: ótimo, bom, neutro, ruim, péssimo)
+   - Seletor de pilar (opcional: Saúde, Estudos, Finanças, Rotina, ou Geral)
+   - Campo de texto (máx 2000 caracteres)
+   - Toggle "Entrada privada" (não usada pelo Mentor IA)
+   - Sugestão de prompt do dia: "Como foi seu dia?", "O que você aprendeu hoje?", "Pelo que é grato?"
+2. Usuário preenche pelo menos o humor e algum texto
+3. Usuário clica em "Salvar"
+4. Sistema salva entrada com timestamp
+5. Se não privada: entrada fica disponível como contexto para Mentor IA [JOUR-005]
+6. Sistema exibe toast: "Reflexão salva! +5 XP" (XP bônus por journaling)
+7. Entrada aparece no topo da timeline
+
+**Pós-condição (sucesso):** Entrada criada e visível na timeline
+
+---
+
+#### UC-131: Visualizar Timeline do Diário
+
+**Prioridade:** P1 — Essencial
+**Ator Primário:** Usuário
+**Rastreabilidade:** [JOUR-003]
+**Trigger:** Usuário acessa tela "Diário"
+
+**Fluxo Principal:**
+1. Sistema carrega entradas do diário ordenadas por data (mais recente primeiro)
+2. Cada entrada exibe: data, emoji de humor, badge de pilar, preview do texto (2 linhas), badge "Privada" se aplicável
+3. Filtros disponíveis: por pilar, por humor, por período
+4. Ao clicar em uma entrada: expande para exibir texto completo
+
+**Pós-condição (sucesso):** Timeline do diário exibida com entradas filtráveis
+
+---
+
+### PKG-SHOP — Loja de Recompensas
+
+---
+
+#### UC-140: Visualizar e Comprar na Loja
+
+**Prioridade:** P1 — Essencial
+**Ator Primário:** Usuário
+**Rastreabilidade:** [SHOP-001] a [SHOP-006]
+**Trigger:** Usuário acessa tela "Loja"
+
+**Pré-condições:**
+- PC-01: Usuário está autenticado
+
+**Fluxo Principal:**
+1. Sistema exibe saldo de Ouro no topo (ícone de moeda + valor em display font)
+2. Sistema exibe tabs de categoria: Auto-recompensas | Avatar | Temas | Sazonais
+3. Auto-recompensas: grid de cards com emoji, nome, preço em ouro, botão "Resgatar"
+4. Usuário clica em "Resgatar" em uma auto-recompensa
+5. Sistema verifica saldo suficiente
+6. Sistema deduz ouro e exibe animação de celebração
+7. Toast especial: "Você resgatou: {recompensa}! Aproveite!"
+
+**Fluxos Alternativos:**
+
+*FA-01: Saldo insuficiente*
+- Botão "Resgatar" exibe tooltip: "Você precisa de mais {X} ouro"
+- Sugestão: "Complete tarefas para ganhar mais ouro!"
+
+*FA-02: Criar auto-recompensa*
+- Usuário clica em "+ Criar recompensa"
+- Modal com: emoji picker, nome (máx 50 chars), preço em ouro (slider 10-500)
+- Ao salvar: recompensa aparece no grid pessoal
+
+**Pós-condição (sucesso):** Recompensa resgatada, ouro deduzido
+
+---
+
+### PKG-QUIZ — Quiz de Segmentação
+
+---
+
+#### UC-150: Completar Quiz de Segmentação
+
+**Prioridade:** P1 — Essencial
+**Ator Primário:** Visitante
+**Rastreabilidade:** [QUIZ-001] a [QUIZ-007]
+**Trigger:** Visitante clica em "Descobrir meu perfil" ou CTA similar na landing page
+
+**Pré-condições:**
+- PC-01: Visitante está na landing page (não autenticado)
+
+**Fluxo Principal:**
+1. Sistema exibe quiz fullscreen no formato one-field-at-a-time (Typeform-style)
+2. Pergunta 1: "Qual área da sua vida você mais quer melhorar?" — 4 cards de pilar selecionáveis
+3. Pergunta 2: "Você já usou apps de produtividade?" — Sim / Não / Vários
+4. Pergunta 3: "O que te faz desistir?" — 4 opções (motivação, complexidade, esquecimento, resultado)
+5. Pergunta 4: "Você gosta de competir com outros?" — 4 opções
+6. Pergunta 5: "Quanto tempo por dia dedicaria?" — 4 opções (5min, 15min, 30min, 1h+)
+7. Pergunta 6: "Qual classe te representa?" — 6 cards de avatar
+8. Pergunta 7: "Como avalia sua vida atual?" — 4 sliders (pilares, 1-10)
+9. Resultado: sistema calcula perfil e exibe:
+   - Avatar sugerido com preview
+   - Radar chart do perfil baseado nos sliders
+   - Plano recomendado com justificativa
+   - "Criar Conta" CTA
+10. Sistema salva respostas em localStorage [QUIZ-006]
+11. Se visitante se cadastra: dados do quiz pré-preenchem o onboarding
+
+**Lógica de recomendação de plano:**
+- Tempo ≤ 5min + não competitivo → Free
+- Tempo 15min + alguma experiência → Starter
+- Tempo 30min+ OU competitivo OU múltiplas prioridades → Boost
+- Tempo 1h+ + competitivo + todas as prioridades → Ultra
+
+**Pós-condição (sucesso):** Perfil calculado, plano recomendado, dados salvos para eventual cadastro
+
+---
+
 ### PKG-ADMIN — Administração
 
 ---
@@ -1719,6 +1930,12 @@ Este documento especifica todos os casos de uso do sistema Life Boost PRO, detal
 | UC-093 | RANK-009, PROF-007 |
 | UC-100 | LAND-001 a LAND-009 |
 | UC-101 | LAND-002, LAND-006 |
+| UC-120 | ANAL-001 a ANAL-010, RN-ANAL-01 |
+| UC-121 | BRIEF-001 a BRIEF-007 |
+| UC-130 | JOUR-001, JOUR-002, JOUR-005, JOUR-006, JOUR-007 |
+| UC-131 | JOUR-003 |
+| UC-140 | SHOP-001 a SHOP-006 |
+| UC-150 | QUIZ-001 a QUIZ-007 |
 | UC-110 | — (requisito implícito de operação) |
 | UC-111 | — (gestão de conquistas) |
 | UC-112 | AI-014 (custos de IA) |

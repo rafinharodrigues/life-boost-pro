@@ -137,6 +137,12 @@ O sistema é standalone (não depende de outro software), web-based, acessado vi
 | DASH-010 | O dashboard deve ser totalmente funcional em telas de 360px de largura (mobile) | Must | MVP |
 | DASH-011 | O dashboard deve carregar em no máximo 3 segundos na primeira visita | Must | MVP |
 | DASH-012 | O dashboard deve exibir posição no ranking semanal (se disponível) | Should | v1.1 |
+| DASH-013 | O dashboard deve exibir um card de Briefing Diário IA com análise, frase motivacional, alertas e prioridades | Must | MVP |
+| DASH-014 | O dashboard deve exibir um gráfico radar (spider chart) mostrando o equilíbrio entre os 4 pilares | Must | MVP |
+| DASH-015 | O dashboard deve exibir um heatmap de atividade dos últimos 30-90 dias (estilo GitHub) | Should | MVP |
+| DASH-016 | O dashboard deve exibir quadro de alertas inteligentes (streak, prazos, pilares negligenciados) | Must | MVP |
+| DASH-017 | O dashboard deve exibir previsão de nível: "Nível X em ~Y dias" baseado no ritmo atual | Should | MVP |
+| DASH-018 | O dashboard deve exibir XP ganho hoje com comparativo vs média diária | Should | MVP |
 
 **Regras de negócio:**
 - RN-DASH-01: Pilares com progresso abaixo de 20% do XP esperado semanal devem exibir indicador visual de alerta
@@ -360,6 +366,74 @@ O sistema é standalone (não depende de outro software), web-based, acessado vi
 | LAND-007 | A landing page deve exibir a tabela de preços com plano Boost em destaque | Must | v1.1 |
 | LAND-008 | A landing page deve funcionar perfeitamente em mobile | Must | MVP |
 | LAND-009 | A landing page deve ter animações sutis de scroll (não pesadas) | Could | MVP |
+
+### 3.13 Módulo de Analytics e Insights (ANAL)
+
+| ID | Requisito | Prioridade | Release |
+|----|-----------|------------|---------|
+| ANAL-001 | O sistema deve exibir um gráfico radar (spider chart) mostrando o equilíbrio entre os 4 pilares | Must | MVP |
+| ANAL-002 | O sistema deve exibir um heatmap estilo GitHub mostrando atividade diária dos últimos 90/180/365 dias | Must | MVP |
+| ANAL-003 | O sistema deve exibir gráficos de tendência (line charts) de XP por pilar ao longo das semanas | Must | MVP |
+| ANAL-004 | O sistema deve calcular e exibir scores comparativos: esta semana vs semana anterior, este mês vs mês anterior | Must | MVP |
+| ANAL-005 | O sistema deve exibir distribuição de tarefas por pilar (donut chart) | Should | MVP |
+| ANAL-006 | O sistema deve exibir taxa de conclusão de tarefas (completadas / criadas) por período | Must | MVP |
+| ANAL-007 | O sistema deve exibir "melhor dia da semana" e "melhor horário" baseado no histórico | Should | v1.1 |
+| ANAL-008 | O sistema deve exibir tempo médio para completar tarefas por dificuldade | Could | v1.1 |
+| ANAL-009 | O sistema deve permitir selecionar período de visualização: 7d, 30d, 90d, 6m, 1 ano | Must | MVP |
+| ANAL-010 | O sistema deve gerar previsões: "Se mantiver este ritmo, atinge Nível X em Y dias" | Should | MVP |
+
+**Regras de negócio:**
+- RN-ANAL-01: Dados do heatmap limitados conforme plano: Free=7d, Starter=30d, Boost=6m, Ultra=ilimitado
+- RN-ANAL-02: Gráfico radar sempre visível para todos os planos (incentiva upgrade ao mostrar dados limitados para free)
+- RN-ANAL-03: Previsões recalculadas a cada login, baseadas na média dos últimos 14 dias
+
+### 3.14 Módulo de Briefing Diário IA (BRIEF)
+
+| ID | Requisito | Prioridade | Release |
+|----|-----------|------------|---------|
+| BRIEF-001 | O sistema deve gerar um briefing diário personalizado pela IA ao acessar o dashboard pela manhã | Must | MVP |
+| BRIEF-002 | O briefing deve conter: análise do estado atual, score de equilíbrio, frase motivacional, top 3 prioridades, alertas | Must | MVP |
+| BRIEF-003 | O briefing deve incluir um quadro de alertas: streak em risco, pilar negligenciado 7+ dias, prazos próximos, padrões negativos | Must | MVP |
+| BRIEF-004 | O briefing deve incluir previsão de nível: "Se mantiver este ritmo, Nível X em Y dias" | Should | MVP |
+| BRIEF-005 | O briefing deve ser gerado apenas 1x por dia (cacheado até meia-noite do fuso do usuário) | Must | MVP |
+| BRIEF-006 | A frase motivacional deve ser contextualizada aos dados do usuário, não genérica | Must | MVP |
+| BRIEF-007 | O briefing deve ser visualmente destacado no topo do dashboard como card hero | Must | MVP |
+
+### 3.15 Módulo de Diário/Journal (JOUR)
+
+| ID | Requisito | Prioridade | Release |
+|----|-----------|------------|---------|
+| JOUR-001 | O usuário deve poder criar entradas de diário vinculadas a um pilar ou "geral" | Must | MVP |
+| JOUR-002 | Cada entrada deve ter: texto (máx 2000 caracteres), pilar (opcional), humor/mood (emoji selector: 5 opções) | Must | MVP |
+| JOUR-003 | O sistema deve exibir histórico de entradas em formato timeline com filtro por pilar e período | Must | MVP |
+| JOUR-004 | A IA deve analisar padrões de humor ao longo do tempo e correlacionar com produtividade | Should | v1.1 |
+| JOUR-005 | Entradas do diário devem alimentar o contexto do Mentor IA para coaching personalizado | Must | MVP |
+| JOUR-006 | O sistema deve sugerir prompts de reflexão diários para facilitar a escrita | Should | MVP |
+| JOUR-007 | O usuário deve poder marcar entradas como "privadas" (não usadas pelo Mentor IA) | Must | MVP |
+
+### 3.16 Módulo de Loja de Recompensas (SHOP)
+
+| ID | Requisito | Prioridade | Release |
+|----|-----------|------------|---------|
+| SHOP-001 | O sistema deve ter uma moeda virtual (Ouro/Gold) ganha ao completar tarefas e conquistas | Must | MVP |
+| SHOP-002 | O sistema deve ter uma loja com itens organizados por categoria: Auto-recompensas, Avatar, Temas | Must | MVP |
+| SHOP-003 | O usuário deve poder criar auto-recompensas customizáveis com preço em ouro (ex: "Assistir 1 ep de série" = 50 ouro) | Must | MVP |
+| SHOP-004 | O sistema deve oferecer itens de avatar (equipamentos, skins) compráveis com ouro | Should | v1.1 |
+| SHOP-005 | O sistema deve ter itens sazonais/limitados com data de expiração | Should | v1.1 |
+| SHOP-006 | Ao "comprar" uma auto-recompensa, o ouro é deduzido e a recompensa aparece como notificação de celebração | Must | MVP |
+| SHOP-007 | O ouro ganho deve ser: Fácil=5, Médio=12, Difícil=25, Épico=50. Conquistas dão 2x o XP bônus em ouro | Must | MVP |
+
+### 3.17 Módulo de Quiz de Segmentação (QUIZ)
+
+| ID | Requisito | Prioridade | Release |
+|----|-----------|------------|---------|
+| QUIZ-001 | A landing page deve ter um quiz interativo de 6-8 perguntas para segmentar o visitante | Must | MVP |
+| QUIZ-002 | O quiz deve coletar: objetivos de vida, experiência com apps de produtividade, estilo de motivação, perfil competitivo, tempo disponível, classe de personagem preferida | Must | MVP |
+| QUIZ-003 | Ao final do quiz, o sistema deve recomendar um plano ideal baseado nas respostas | Must | MVP |
+| QUIZ-004 | O quiz deve exibir um preview personalizado: avatar sugerido, primeiras missões, previsão de progresso | Should | MVP |
+| QUIZ-005 | O quiz deve ter formato one-field-at-a-time (estilo Typeform) para maximizar conclusão | Must | MVP |
+| QUIZ-006 | O quiz deve salvar respostas em localStorage para pré-preencher o onboarding se o visitante se cadastrar | Must | MVP |
+| QUIZ-007 | O sistema deve rastrear taxa de conclusão do quiz como métrica de conversão | Must | MVP |
 
 ---
 
@@ -609,7 +683,7 @@ O sistema é standalone (não depende de outro software), web-based, acessado vi
 
 | Release | Módulos | Total de Requisitos |
 |---------|---------|---------------------|
-| MVP | AUTH, ONB, DASH, TASK, PROG, AVT (base), ACH, AI, PROF (base), LAND | ~85 requisitos |
+| MVP | AUTH, ONB, DASH, TASK, PROG, AVT (base), ACH, AI, PROF (base), LAND, ANAL, BRIEF, JOUR, SHOP, QUIZ | ~130 requisitos |
 | v1.1 | RANK, PAY, AVT (evolução), PROF (completo), LAND (pricing) | ~35 requisitos |
 | v1.2 | Sistema de amigos, ranking entre amigos, desafios em grupo, I18N inglês | ~20 requisitos |
 | v2.0 | App mobile nativo, push notifications, widgets | A definir |

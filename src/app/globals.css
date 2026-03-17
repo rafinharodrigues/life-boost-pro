@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* ===== FONTS ===== */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+
+  /* ===== COLORS: Background ===== */
+  --color-bg-primary: #050508;
+  --color-bg-secondary: #0A0A10;
+  --color-bg-tertiary: #111118;
+  --color-bg-elevated: #18181F;
+  --color-bg-input: #0D0D14;
+  --color-bg-hover: #141420;
+
+  /* ===== COLORS: Text ===== */
+  --color-text-primary: #F0F0F5;
+  --color-text-secondary: #9494A8;
+  --color-text-tertiary: #5C5C72;
+  --color-text-inverse: #0A0A0F;
+
+  /* ===== COLORS: Accent ===== */
+  --color-accent-primary: #39FF14;
+  --color-accent-primary-light: #7AFF5C;
+  --color-accent-cyan: #00D2FF;
+  --color-accent-green: #00E676;
+  --color-accent-amber: #FFAB00;
+  --color-accent-red: #FF5252;
+  --color-accent-pink: #FF4081;
+
+  /* ===== COLORS: Pillar ===== */
+  --color-pillar-health: #00E676;
+  --color-pillar-intelligence: #00D2FF;
+  --color-pillar-gold: #FFAB00;
+  --color-pillar-strength: #39FF14;
+
+  /* ===== COLORS: Semantic ===== */
+  --color-semantic-success: #00E676;
+  --color-semantic-warning: #FFAB00;
+  --color-semantic-error: #FF5252;
+  --color-semantic-info: #00D2FF;
+}
+
+/* ===== BASE STYLES ===== */
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans), sans-serif;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-bg-tertiary);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-bg-elevated);
+}
+
+/* ===== PROGRESS BAR ANIMATION ===== */
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+@keyframes xp-float {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(57, 255, 20, 0.15); }
+  50% { box-shadow: 0 0 20px rgba(57, 255, 20, 0.3); }
+}
+
+@keyframes streak-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 150ms !important;
+  }
+}
