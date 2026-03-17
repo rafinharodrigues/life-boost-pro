@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Swords,
   Pencil,
@@ -10,7 +12,13 @@ import {
 import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import ProgressBar from '@/components/ui/progress-bar';
-import { mockUser, mockPillars, mockAchievements, mockWeeklyActivity } from '@/lib/mock-data';
+import { useUserStore } from '@/store/user.store';
+import { useTaskStore } from '@/store/task.store';
+import { useAchievementStore } from '@/store/achievement.store';
+import { useJournalStore } from '@/store/journal.store';
+import RadarChart from '@/components/charts/radar-chart';
+import WeeklyBars from '@/components/charts/weekly-bars';
+import { mockWeeklyActivity } from '@/lib/mock-data';
 import { PILLAR_CONFIG } from '@/types';
 import type { PillarType } from '@/types';
 
@@ -21,25 +29,51 @@ const pillarIconMap: Record<PillarType, React.ComponentType<{ className?: string
   strength: Clock,
 };
 
-const stats = [
-  { label: 'Tarefas completadas', value: '847' },
-  { label: 'XP total', value: '125.400' },
-  { label: 'Streak atual', value: '12 dias' },
-  { label: 'Maior streak', value: '34 dias' },
-  { label: 'Dias ativos', value: '94' },
-  { label: 'Conquistas', value: '8 / 15' },
-];
-
-const unlockedAchievements = mockAchievements.filter((a) => a.unlocked).slice(0, 5);
+const PILLAR_LABELS: Record<PillarType, string> = {
+  health: 'Saude',
+  intelligence: 'Estudos',
+  gold: 'Financas',
+  strength: 'Rotina',
+};
 
 export default function ProfilePage() {
+  const user = useUserStore((s) => s.user);
+  const pillars = useUserStore((s) => s.pillars);
+  const gold = useUserStore((s) => s.gold);
+  const tasks = useTaskStore((s) => s.tasks);
+  const achievements = useAchievementStore((s) => s.achievements);
+  const journalEntries = useJournalStore((s) => s.entries);
+
+  // Stats calculated from stores
+  const completedTasks = tasks.filter((t) => t.status === 'completed');
+  const totalCompletedCount = completedTasks.length;
+  const totalXp = user.totalXp;
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const totalAchievements = achievements.length;
+
+  const stats = [
+    { label: 'Tarefas completadas', value: String(totalCompletedCount) },
+    { label: 'XP total', value: totalXp.toLocaleString('pt-BR') },
+    { label: 'Streak atual', value: `${user.streakCount} dias` },
+    { label: 'Maior streak', value: `${user.maxStreak} dias` },
+    { label: 'Entradas do diario', value: String(journalEntries.length) },
+    { label: 'Conquistas', value: `${unlockedCount} / ${totalAchievements}` },
+  ];
+
+  const unlockedAchievements = achievements.filter((a) => a.unlocked).slice(0, 5);
+
   const xpPercent = Math.round(
-    (mockPillars.reduce((s, p) => s + p.currentXp, 0) /
-      mockPillars.reduce((s, p) => s + p.xpToNextLevel, 0)) *
+    (pillars.reduce((s, p) => s + p.currentXp, 0) /
+      pillars.reduce((s, p) => s + p.xpToNextLevel, 0)) *
       100,
   );
 
-  const maxXp = Math.max(...mockWeeklyActivity.map((d) => d.xp), 1);
+  // Radar chart data from pillar levels
+  const radarData = pillars.map((p) => ({
+    pillar: PILLAR_LABELS[p.type],
+    value: p.currentLevel,
+    fullMark: 10,
+  }));
 
   return (
     <div className="space-y-6">
@@ -65,7 +99,7 @@ export default function ProfilePage() {
 
             {/* Name & username */}
             <div>
-              <h2 className="text-xl font-bold text-text-primary">{mockUser.displayName}</h2>
+              <h2 className="text-xl font-bold text-text-primary">{user.displayName}</h2>
               <p className="text-sm text-text-secondary">@joaowarrior</p>
             </div>
 
@@ -73,19 +107,25 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <div className="flex items-center justify-center gap-2">
                 <span className="font-mono text-sm text-accent-primary-light">
-                  Lv. {mockUser.currentLevel}
+                  Lv. {user.currentLevel}
                 </span>
                 <span className="text-xs text-text-tertiary">
-                  {mockUser.totalXp.toLocaleString('pt-BR')} XP
+                  {user.totalXp.toLocaleString('pt-BR')} XP
                 </span>
               </div>
               <ProgressBar value={xpPercent} size="sm" />
             </div>
 
+            {/* Gold balance */}
+            <div className="flex items-center justify-center gap-2">
+              <Coins className="h-4 w-4 text-accent-amber" />
+              <span className="font-mono text-sm font-semibold text-accent-amber">{gold} Gold</span>
+            </div>
+
             {/* Plan badge */}
             <div className="flex items-center justify-center gap-2">
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-accent-primary/15 text-accent-primary text-sm font-medium">
-                Boost &#11088;
+                {user.plan === 'boost' ? 'Boost \u2B50' : user.plan === 'ultra' ? 'Ultra \uD83D\uDC8E' : user.plan === 'starter' ? 'Starter' : 'Free'}
               </span>
             </div>
 
@@ -98,7 +138,7 @@ export default function ProfilePage() {
             <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
               Pilares
             </h3>
-            {mockPillars.map((pillar) => {
+            {pillars.map((pillar) => {
               const config = PILLAR_CONFIG[pillar.type];
               const PillarIcon = pillarIconMap[pillar.type];
               const pct = Math.round((pillar.currentXp / pillar.xpToNextLevel) * 100);
@@ -142,27 +182,11 @@ export default function ProfilePage() {
             ))}
           </div>
 
+          {/* Radar chart with pillar levels */}
+          <RadarChart data={radarData} />
+
           {/* Weekly activity chart */}
-          <Card>
-            <h3 className="text-sm font-semibold text-text-secondary mb-4">Atividade semanal</h3>
-            <div className="flex items-end gap-2 h-32">
-              {mockWeeklyActivity.map((day) => {
-                const heightPct = day.xp > 0 ? Math.max((day.xp / maxXp) * 100, 8) : 4;
-                return (
-                  <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-mono text-text-tertiary">
-                      {day.xp > 0 ? day.xp : ''}
-                    </span>
-                    <div
-                      className="w-full rounded-t-md bg-accent-primary/60 transition-all"
-                      style={{ height: `${heightPct}%` }}
-                    />
-                    <span className="text-[10px] text-text-tertiary">{day.day}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+          <WeeklyBars data={mockWeeklyActivity} />
 
           {/* Featured achievements */}
           <Card>

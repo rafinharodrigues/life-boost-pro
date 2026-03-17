@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Flame,
   Bot,
@@ -23,19 +25,23 @@ import {
 import Card from '@/components/ui/card';
 import ProgressBar from '@/components/ui/progress-bar';
 import Badge from '@/components/ui/badge';
+import StreakFire from '@/components/ui/streak-fire';
+import PillarRadarChart from '@/components/charts/radar-chart';
+import WeeklyBars from '@/components/charts/weekly-bars';
+import ActivityHeatmap from '@/components/charts/activity-heatmap';
+import { useUserStore } from '@/store/user.store';
+import { useTaskStore } from '@/store/task.store';
+import { useAchievementStore } from '@/store/achievement.store';
 import {
-  mockUser,
-  mockPillars,
-  mockTasks,
   mockBriefing,
   mockWeeklyActivity,
-  mockAchievements,
   mockHeatmap,
+  mockWeeklyXpTrend,
   mockXpToday,
   mockXpAvgDaily,
   mockMentorMessage,
 } from '@/lib/mock-data';
-import { PILLAR_CONFIG, DIFFICULTY_CONFIG } from '@/types';
+import { PILLAR_CONFIG } from '@/types';
 import type { PillarType } from '@/types';
 import Link from 'next/link';
 
@@ -59,48 +65,47 @@ const ALERT_ICONS: Record<string, { icon: typeof Flame; colorClass: string }> = 
   deadline: { icon: AlertTriangle, colorClass: 'text-semantic-error' },
 };
 
-const DAY_LABELS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-
-function getHeatmapOpacity(xp: number): string {
-  if (xp === 0) return 'bg-white/5';
-  if (xp <= 50) return 'bg-accent-primary/20';
-  if (xp <= 100) return 'bg-accent-primary/40';
-  if (xp <= 150) return 'bg-accent-primary/60';
-  return 'bg-accent-primary/80';
-}
-
 export default function DashboardPage() {
-  const pendingTasks = mockTasks.filter((t) => t.status === 'pending');
-  const completedTasks = mockTasks.filter((t) => t.status === 'completed');
+  // ---- Store connections ----
+  const user = useUserStore((s) => s.user);
+  const pillars = useUserStore((s) => s.pillars);
+  const gold = useUserStore((s) => s.gold);
+  const tasks = useTaskStore((s) => s.tasks);
+  const achievements = useAchievementStore((s) => s.achievements);
+  const getNextAchievements = useAchievementStore((s) => s.getNextAchievements);
+
+  // ---- Derived data ----
+  const pendingTasks = tasks.filter((t) => t.status === 'pending');
+  const completedTasks = tasks.filter((t) => t.status === 'completed');
   const todayTasks = [...pendingTasks, ...completedTasks];
   const completedCount = completedTasks.length;
   const totalCount = todayTasks.length;
 
-  const upcomingAchievements = mockAchievements
-    .filter((a) => !a.unlocked && a.progress !== undefined && a.progressMax !== undefined)
-    .slice(0, 3);
+  const upcomingAchievements = getNextAchievements();
 
-  const maxXp = Math.max(...mockWeeklyActivity.map((d) => d.xp), 1);
-
-  const userXpCurrent = 3245;
-  const userXpTarget = 4200;
-  const xpPercent = Math.round((userXpCurrent / userXpTarget) * 100);
+  // User level XP progress: use the average of all pillar XP percentages
+  const avgXpPercent = pillars.length > 0
+    ? Math.round(
+        pillars.reduce((sum, p) => sum + (p.currentXp / p.xpToNextLevel) * 100, 0) / pillars.length
+      )
+    : 0;
 
   const xpDiffPercent = mockXpAvgDaily > 0
     ? Math.round(((mockXpToday - mockXpAvgDaily) / mockXpAvgDaily) * 100)
     : 0;
   const xpAboveAvg = xpDiffPercent >= 0;
 
-  // Heatmap: organize into rows by day-of-week
-  const heatmapRows: { date: string; xp: number; tasks: number }[][] = Array.from(
-    { length: 7 },
-    () => []
-  );
-  for (const day of mockHeatmap) {
-    const d = new Date(day.date);
-    const dow = d.getDay(); // 0=Sun
-    heatmapRows[dow].push(day);
-  }
+  // Radar chart data: pillar levels mapped to 0-10 scale
+  const radarData = pillars.map((p) => ({
+    pillar: PILLAR_CONFIG[p.type].label,
+    value: Math.min(p.currentLevel, 10),
+    fullMark: 10,
+  }));
+
+  // ---- Handlers ----
+  const handleCompleteTask = (taskId: string) => {
+    useTaskStore.getState().completeTask(taskId);
+  };
 
   return (
     <div className="space-y-6">
@@ -168,56 +173,11 @@ export default function DashboardPage() {
           </Card>
 
           {/* 2. Radar / Pillar Balance Chart */}
-          <Card>
-            <h3 className="mb-4 text-base font-semibold">Equilibrio dos Pilares</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {mockPillars.map((pillar) => {
-                const config = PILLAR_CONFIG[pillar.type];
-                const color = PILLAR_COLORS[pillar.type];
-                const percent = Math.round((pillar.currentXp / pillar.xpToNextLevel) * 100);
-                const PillarIcon = PILLAR_ICONS[pillar.type];
-
-                return (
-                  <div key={pillar.type} className="flex flex-col items-center gap-2">
-                    {/* Radial bar simulation */}
-                    <div className="relative flex h-20 w-20 items-center justify-center">
-                      {/* Background ring */}
-                      <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 80 80">
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="34"
-                          fill="none"
-                          stroke="rgba(255,255,255,0.06)"
-                          strokeWidth="6"
-                        />
-                        <circle
-                          cx="40"
-                          cy="40"
-                          r="34"
-                          fill="none"
-                          stroke={color}
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          strokeDasharray={`${(percent / 100) * 213.6} 213.6`}
-                          style={{ filter: `drop-shadow(0 0 4px ${color}40)` }}
-                        />
-                      </svg>
-                      <div className="z-10 flex flex-col items-center">
-                        <PillarIcon className="h-4 w-4" style={{ color }} />
-                        <span className="mt-0.5 font-mono text-xs font-bold">{pillar.currentLevel}</span>
-                      </div>
-                    </div>
-                    <span className="text-[11px] font-medium text-text-secondary">{config.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+          <PillarRadarChart data={radarData} />
 
           {/* 3. 4 Pillar Cards */}
           <div className="grid grid-cols-2 gap-3">
-            {mockPillars.map((pillar) => {
+            {pillars.map((pillar) => {
               const config = PILLAR_CONFIG[pillar.type];
               const PillarIcon = PILLAR_ICONS[pillar.type];
               const color = PILLAR_COLORS[pillar.type];
@@ -238,12 +198,7 @@ export default function DashboardPage() {
                     <p className="font-mono text-lg font-bold">
                       Nivel {pillar.currentLevel}
                     </p>
-                    <div className="w-full overflow-hidden rounded-full bg-white/6 h-2">
-                      <div
-                        className="h-full rounded-full transition-all duration-600 ease-out"
-                        style={{ width: `${percent}%`, backgroundColor: color }}
-                      />
-                    </div>
+                    <ProgressBar value={percent} size="sm" color={`bg-[${color}]`} />
                     <p className="font-mono text-xs text-text-tertiary">
                       {pillar.currentXp} / {pillar.xpToNextLevel} XP
                     </p>
@@ -266,7 +221,11 @@ export default function DashboardPage() {
             <ul className="space-y-2">
               {pendingTasks.map((task) => (
                 <li key={task.id} className="flex items-center gap-3">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-text-tertiary" />
+                  <button
+                    onClick={() => handleCompleteTask(task.id)}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-text-tertiary transition-colors hover:border-accent-primary hover:bg-accent-primary/10"
+                    aria-label={`Completar tarefa: ${task.title}`}
+                  />
                   <span className="flex-1 text-sm">{task.title}</span>
                   {task.source === 'ai' && (
                     <Badge variant="source" label="IA" color="#00D2FF" />
@@ -300,67 +259,8 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* 5. Heatmap de Atividade (90 dias) */}
-          <Card>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-semibold">Atividade</h3>
-              <span className="text-xs text-text-tertiary">ultimos 90 dias</span>
-            </div>
-            <div className="flex gap-1">
-              {/* Day labels */}
-              <div className="flex flex-col gap-[3px] pr-1 pt-0">
-                {DAY_LABELS.map((label, i) => (
-                  <span
-                    key={i}
-                    className="flex h-2.5 items-center text-[9px] leading-none text-text-tertiary"
-                  >
-                    {i % 2 === 0 ? label : ''}
-                  </span>
-                ))}
-              </div>
-              {/* Grid */}
-              <div className="flex flex-1 gap-[3px] overflow-hidden">
-                {(() => {
-                  // Group by week columns
-                  const weeks: { date: string; xp: number }[][] = [];
-                  let currentWeek: { date: string; xp: number }[] = [];
-
-                  for (const day of mockHeatmap) {
-                    const d = new Date(day.date);
-                    const dow = d.getDay();
-                    if (dow === 0 && currentWeek.length > 0) {
-                      weeks.push(currentWeek);
-                      currentWeek = [];
-                    }
-                    currentWeek.push(day);
-                  }
-                  if (currentWeek.length > 0) weeks.push(currentWeek);
-
-                  return weeks.map((week, wi) => (
-                    <div key={wi} className="flex flex-col gap-[3px]">
-                      {week.map((day) => (
-                        <div
-                          key={day.date}
-                          className={`h-2.5 w-2.5 rounded-[2px] ${getHeatmapOpacity(day.xp)}`}
-                          title={`${day.date}: ${day.xp} XP`}
-                        />
-                      ))}
-                    </div>
-                  ));
-                })()}
-              </div>
-            </div>
-            {/* Legend */}
-            <div className="mt-2 flex items-center justify-end gap-1">
-              <span className="text-[9px] text-text-tertiary">Menos</span>
-              <div className="h-2.5 w-2.5 rounded-[2px] bg-white/5" />
-              <div className="h-2.5 w-2.5 rounded-[2px] bg-accent-primary/20" />
-              <div className="h-2.5 w-2.5 rounded-[2px] bg-accent-primary/40" />
-              <div className="h-2.5 w-2.5 rounded-[2px] bg-accent-primary/60" />
-              <div className="h-2.5 w-2.5 rounded-[2px] bg-accent-primary/80" />
-              <span className="text-[9px] text-text-tertiary">Mais</span>
-            </div>
-          </Card>
+          {/* 5. Heatmap de Atividade (90 dias) — Recharts component */}
+          <ActivityHeatmap data={mockHeatmap} />
         </div>
 
         {/* ===== RIGHT COLUMN ===== */}
@@ -371,37 +271,42 @@ export default function DashboardPage() {
               <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-bg-tertiary">
                 <Swords className="h-7 w-7 text-text-tertiary" />
               </div>
-              <h2 className="text-lg font-semibold">{mockUser.displayName}</h2>
+              <h2 className="text-lg font-semibold">{user.displayName}</h2>
               <p className="text-xs text-text-tertiary">@joaowarrior</p>
               <p className="mt-2 font-mono text-lg font-bold">
-                Nivel {mockUser.currentLevel}
+                Nivel {user.currentLevel}
               </p>
               <div className="mt-2 w-full">
-                <ProgressBar value={xpPercent} size="sm" />
+                <ProgressBar value={avgXpPercent} size="sm" />
               </div>
               <p className="mt-1 font-mono text-xs text-text-tertiary">
-                {userXpCurrent.toLocaleString('pt-BR')} / {userXpTarget.toLocaleString('pt-BR')} XP
+                {user.totalXp.toLocaleString('pt-BR')} XP total
               </p>
-              <Badge
-                variant="plan"
-                label="Boost"
-                color="#FFAB00"
-                className="mt-2"
-              />
+              <div className="mt-2 flex items-center gap-2">
+                <Badge
+                  variant="plan"
+                  label={user.plan === 'boost' ? 'Boost' : user.plan === 'ultra' ? 'Ultra' : user.plan === 'starter' ? 'Starter' : 'Free'}
+                  color="#FFAB00"
+                />
+                <div className="flex items-center gap-1">
+                  <Coins className="h-3.5 w-3.5 text-accent-amber" />
+                  <span className="font-mono text-sm font-bold text-accent-amber">{gold}</span>
+                </div>
+              </div>
             </div>
           </Card>
 
           {/* 7. Streak Card */}
           <Card>
             <div className="flex flex-col items-center text-center">
-              <Flame className="h-8 w-8 text-accent-amber" />
-              <span className="mt-1 font-mono text-3xl font-bold">{mockUser.streakCount}</span>
+              <StreakFire count={user.streakCount} />
+              <span className="mt-2 font-mono text-3xl font-bold">{user.streakCount}</span>
               <span className="text-xs text-text-secondary">dias consecutivos</span>
               <span className="mt-1 text-xs text-text-tertiary">
-                Maior: {mockUser.maxStreak} dias
+                Maior: {user.maxStreak} dias
               </span>
               <span className="mt-0.5 text-xs text-accent-primary">
-                Multiplicador: 1.25x XP
+                Multiplicador: {user.streakCount >= 30 ? '2x' : user.streakCount >= 14 ? '1.5x' : user.streakCount >= 7 ? '1.25x' : '1x'} XP
               </span>
             </div>
           </Card>
@@ -497,33 +402,8 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* 12. Atividade Semanal */}
-          <Card>
-            <h3 className="mb-3 text-sm font-semibold">Atividade da semana</h3>
-            <div className="flex items-end justify-between gap-1" style={{ height: 100 }}>
-              {mockWeeklyActivity.map((day) => {
-                const barHeight =
-                  day.xp > 0 ? Math.max((day.xp / maxXp) * 100, 4) : 4;
-                return (
-                  <div
-                    key={day.day}
-                    className="flex flex-1 flex-col items-center gap-1"
-                  >
-                    <span className="font-mono text-[10px] text-text-tertiary">
-                      {day.xp > 0 ? day.xp : ''}
-                    </span>
-                    <div
-                      className="w-full rounded-t bg-accent-primary/80 transition-all hover:bg-accent-primary"
-                      style={{ height: `${barHeight}%` }}
-                    />
-                    <span className="text-[10px] text-text-tertiary">
-                      {day.day}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+          {/* 12. Atividade Semanal — Recharts component */}
+          <WeeklyBars data={mockWeeklyActivity} />
         </div>
       </div>
     </div>

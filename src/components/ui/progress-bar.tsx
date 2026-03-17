@@ -1,3 +1,7 @@
+'use client';
+
+import { motion } from 'framer-motion';
+
 interface ProgressBarProps {
   value: number;
   size?: 'sm' | 'md' | 'lg';
@@ -31,12 +35,14 @@ export default function ProgressBar({
       )}
 
       <div className={`w-full bg-white/6 rounded-full overflow-hidden ${sizeClasses[size]}`}>
-        <div
+        <motion.div
           className={[
-            'h-full rounded-full transition-all duration-600 ease-out',
+            'h-full rounded-full',
             color ?? 'bg-gradient-to-r from-accent-primary to-accent-primary-light',
           ].join(' ')}
-          style={{ width: `${clampedValue}%` }}
+          initial={false}
+          animate={{ width: `${clampedValue}%` }}
+          transition={{ type: 'spring', stiffness: 100, damping: 15 }}
           role="progressbar"
           aria-valuenow={clampedValue}
           aria-valuemin={0}

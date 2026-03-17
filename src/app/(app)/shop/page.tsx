@@ -24,7 +24,8 @@ import {
 import Card from '@/components/ui/card';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
-import { mockShopRewards, mockUserGold } from '@/lib/mock-data';
+import { useShopStore } from '@/store/shop.store';
+import { useUserStore } from '@/store/user.store';
 
 type ShopTab = 'rewards' | 'avatar' | 'themes' | 'seasonal';
 
@@ -57,16 +58,33 @@ const themes = [
 
 // Seasonal items
 const seasonalItems = [
-  { id: 'se1', emoji: '☀️', name: 'Armadura Solar', cost: 300, type: 'avatar' },
-  { id: 'se2', emoji: '🏖️', name: 'Badge Verao 2026', cost: 100, type: 'badge' },
-  { id: 'se3', emoji: '🌊', name: 'Efeito Ondas', cost: 200, type: 'effect' },
-  { id: 'se4', emoji: '🍹', name: 'Titulo: Curtidor', cost: 150, type: 'title' },
-  { id: 'se5', emoji: '🌺', name: 'Moldura Tropical', cost: 250, type: 'frame' },
-  { id: 'se6', emoji: '🐚', name: 'Pet Conchinha', cost: 400, type: 'pet' },
+  { id: 'se1', emoji: '\u2600\uFE0F', name: 'Armadura Solar', cost: 300, type: 'avatar' },
+  { id: 'se2', emoji: '\uD83C\uDFD6\uFE0F', name: 'Badge Verao 2026', cost: 100, type: 'badge' },
+  { id: 'se3', emoji: '\uD83C\uDF0A', name: 'Efeito Ondas', cost: 200, type: 'effect' },
+  { id: 'se4', emoji: '\uD83C\uDF79', name: 'Titulo: Curtidor', cost: 150, type: 'title' },
+  { id: 'se5', emoji: '\uD83C\uDF3A', name: 'Moldura Tropical', cost: 250, type: 'frame' },
+  { id: 'se6', emoji: '\uD83D\uDC1A', name: 'Pet Conchinha', cost: 400, type: 'pet' },
 ];
 
 export default function ShopPage() {
   const [activeTab, setActiveTab] = useState<ShopTab>('rewards');
+
+  // Reactive gold balance from store
+  const gold = useUserStore((s) => s.gold);
+  // Rewards from shop store
+  const rewards = useShopStore((s) => s.rewards);
+
+  function handleRedeem(id: string) {
+    useShopStore.getState().redeemReward(id);
+  }
+
+  function handleCreateReward() {
+    useShopStore.getState().createReward({
+      emoji: '\uD83C\uDF81',
+      name: 'Nova Recompensa',
+      costGold: 100,
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -78,7 +96,7 @@ export default function ShopPage() {
         </div>
         <div className="flex items-center gap-2 rounded-lg bg-accent-amber/15 px-3 py-1.5">
           <Coins className="h-4 w-4 text-accent-amber" />
-          <span className="font-mono text-xl font-bold text-accent-amber">{mockUserGold}</span>
+          <span className="font-mono text-xl font-bold text-accent-amber">{gold}</span>
         </div>
       </div>
 
@@ -103,14 +121,14 @@ export default function ShopPage() {
       {/* Tab Content */}
       {activeTab === 'rewards' && (
         <div className="space-y-4">
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="sm" onClick={handleCreateReward}>
             <Plus className="h-4 w-4" />
             Criar recompensa
           </Button>
 
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            {mockShopRewards.map((reward) => {
-              const canAfford = mockUserGold >= reward.costGold;
+            {rewards.map((reward) => {
+              const canAfford = gold >= reward.costGold;
               return (
                 <Card key={reward.id} hover>
                   <div className="flex flex-col items-center gap-2 text-center">
@@ -130,6 +148,7 @@ export default function ShopPage() {
                       size="sm"
                       disabled={!canAfford}
                       className="w-full"
+                      onClick={() => handleRedeem(reward.id)}
                     >
                       Resgatar
                     </Button>
@@ -195,7 +214,7 @@ export default function ShopPage() {
                       <Button
                         variant="secondary"
                         size="sm"
-                        disabled={mockUserGold < item.cost}
+                        disabled={gold < item.cost}
                         className="text-[10px]"
                       >
                         Desbloquear
@@ -212,7 +231,7 @@ export default function ShopPage() {
       {activeTab === 'themes' && (
         <div className="grid grid-cols-2 gap-4">
           {themes.map((theme) => {
-            const canAfford = theme.cost === 0 || mockUserGold >= theme.cost;
+            const canAfford = theme.cost === 0 || gold >= theme.cost;
             return (
               <Card key={theme.id} hover>
                 <div className="space-y-3">
@@ -270,7 +289,7 @@ export default function ShopPage() {
           <Card className="border-accent-amber/30 bg-gradient-to-r from-accent-amber/10 via-accent-primary/5 to-transparent">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
-                <span className="text-3xl">☀️</span>
+                <span className="text-3xl">{'\u2600\uFE0F'}</span>
                 <div>
                   <h3 className="text-base font-bold text-text-primary">Evento de Verao</h3>
                   <p className="text-sm text-text-secondary">
@@ -288,7 +307,7 @@ export default function ShopPage() {
           {/* Seasonal items grid */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
             {seasonalItems.map((item) => {
-              const canAfford = mockUserGold >= item.cost;
+              const canAfford = gold >= item.cost;
               return (
                 <Card key={item.id} hover>
                   <div className="flex flex-col items-center gap-2 text-center">

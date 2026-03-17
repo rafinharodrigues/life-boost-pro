@@ -7,11 +7,14 @@ import {
   Filter,
   Lock,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 import Card from '@/components/ui/card';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
-import { mockJournalEntries } from '@/lib/mock-data';
+import { useJournalStore } from '@/store/journal.store';
+import { useUserStore } from '@/store/user.store';
+import { useUiStore } from '@/store/ui.store';
 import { PILLAR_CONFIG, MOOD_EMOJIS } from '@/types';
 import type { Mood, PillarType } from '@/types';
 
@@ -46,6 +49,50 @@ export default function JournalPage() {
   const [selectedPillar, setSelectedPillar] = useState<PillarType | 'general'>('general');
   const [content, setContent] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [filterPillar, setFilterPillar] = useState<PillarType | undefined>(undefined);
+  const [filterMood, setFilterMood] = useState<Mood | undefined>(undefined);
+
+  const entries = useJournalStore((s) => s.entries);
+
+  // Apply local filters
+  const filteredEntries = entries.filter((entry) => {
+    if (filterPillar && entry.pillarType !== filterPillar) return false;
+    if (filterMood && entry.mood !== filterMood) return false;
+    return true;
+  });
+
+  function handleSave() {
+    if (!content.trim() || !selectedMood) return;
+
+    const pillarType = selectedPillar === 'general' ? undefined : selectedPillar;
+
+    useJournalStore.getState().addEntry({
+      mood: selectedMood,
+      content: content.trim(),
+      pillarType,
+      isPrivate,
+    });
+
+    // Award +5 XP bonus
+    const xpPillar = pillarType || 'strength';
+    useUserStore.getState().addXpToPillar(xpPillar, 5);
+
+    // Show toast
+    useUiStore.getState().addToast({
+      type: 'xp',
+      message: 'Reflexao salva! +5 XP',
+    });
+
+    // Reset form
+    setContent('');
+    setSelectedMood(4);
+    setSelectedPillar('general');
+    setIsPrivate(false);
+  }
+
+  function handleDelete(id: string) {
+    useJournalStore.getState().deleteEntry(id);
+  }
 
   return (
     <div className="space-y-6">
@@ -55,7 +102,7 @@ export default function JournalPage() {
           <BookHeart className="h-6 w-6 text-accent-primary" />
           <h1 className="text-2xl font-bold">Diario de Reflexao</h1>
         </div>
-        <Button variant="primary" size="sm">
+        <Button variant="primary" size="sm" onClick={handleSave}>
           <Plus className="h-4 w-4" />
           Nova entrada
         </Button>
@@ -153,7 +200,7 @@ export default function JournalPage() {
             <span className="text-xs">Entrada privada</span>
           </button>
 
-          <Button variant="primary" size="sm">
+          <Button variant="primary" size="sm" onClick={handleSave}>
             Salvar reflexao
           </Button>
         </div>
@@ -173,7 +220,7 @@ export default function JournalPage() {
           {/* Vertical timeline line */}
           <div className="absolute left-[27px] top-0 bottom-0 w-[2px] bg-white/6" />
 
-          {mockJournalEntries.map((entry, i) => {
+          {filteredEntries.map((entry) => {
             const { day, month } = formatDate(entry.createdAt);
             const pillarConfig = entry.pillarType ? PILLAR_CONFIG[entry.pillarType] : null;
             const pillarColor = entry.pillarType ? PILLAR_COLORS[entry.pillarType] : null;
@@ -214,6 +261,12 @@ export default function JournalPage() {
                         )}
                       </div>
                     </div>
+                    <button
+                      onClick={() => handleDelete(entry.id)}
+                      className="shrink-0 rounded p-1 text-text-tertiary transition-colors hover:bg-white/5 hover:text-semantic-error"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </Card>
               </div>

@@ -1,7 +1,11 @@
+'use client';
+
+import { useState } from 'react';
 import { Trophy, Lock, HelpCircle } from 'lucide-react';
 import Card from '@/components/ui/card';
 import ProgressBar from '@/components/ui/progress-bar';
-import { mockAchievements } from '@/lib/mock-data';
+import { useAchievementStore } from '@/store/achievement.store';
+import { useUserStore } from '@/store/user.store';
 import type { AchievementCategory } from '@/types';
 
 const CATEGORY_TABS: { key: AchievementCategory | 'all'; label: string }[] = [
@@ -13,10 +17,20 @@ const CATEGORY_TABS: { key: AchievementCategory | 'all'; label: string }[] = [
   { key: 'secret', label: 'Segredo' },
 ];
 
-const unlockedCount = mockAchievements.filter((a) => a.unlocked).length;
-const totalCount = mockAchievements.length;
-
 export default function AchievementsPage() {
+  const [activeCategory, setActiveCategory] = useState<AchievementCategory | 'all'>('all');
+
+  const achievements = useAchievementStore((s) => s.achievements);
+  const user = useUserStore((s) => s.user);
+
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const totalCount = achievements.length;
+
+  const filtered =
+    activeCategory === 'all'
+      ? achievements
+      : achievements.filter((a) => a.category === activeCategory);
+
   return (
     <div className="space-y-6">
       {/* Title + count */}
@@ -30,22 +44,23 @@ export default function AchievementsPage() {
       {/* Category filter tabs */}
       <div className="flex flex-wrap items-center gap-2">
         {CATEGORY_TABS.map((tab) => (
-          <span
+          <button
             key={tab.key}
+            onClick={() => setActiveCategory(tab.key)}
             className={
-              tab.key === 'all'
+              tab.key === activeCategory
                 ? 'inline-flex items-center rounded-lg bg-accent-primary/15 px-3 py-1.5 text-sm font-medium text-accent-primary'
                 : 'inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-white/5'
             }
           >
             {tab.label}
-          </span>
+          </button>
         ))}
       </div>
 
       {/* Achievements grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {mockAchievements.map((ach) => {
+        {filtered.map((ach) => {
           /* Secret + locked */
           if (ach.isSecret && !ach.unlocked) {
             return (

@@ -15,14 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 import Card from '@/components/ui/card';
 import Badge from '@/components/ui/badge';
 import ProgressBar from '@/components/ui/progress-bar';
 import Button from '@/components/ui/button';
-import { mockTasks } from '@/lib/mock-data';
+import { useTaskStore } from '@/store/task.store';
+import { useUserStore } from '@/store/user.store';
 import { PILLAR_CONFIG, DIFFICULTY_CONFIG } from '@/types';
-import type { PillarType, TaskStatus, Task } from '@/types';
+import type { PillarType, TaskStatus, Task, Difficulty } from '@/types';
 
 const PILLAR_COLORS: Record<PillarType, string> = {
   health: '#00E676',
@@ -80,7 +82,7 @@ const MONTH_NAMES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
-function TaskRow({ task }: { task: Task }) {
+function TaskRow({ task, onComplete, onDelete }: { task: Task; onComplete: (id: string) => void; onDelete: (id: string) => void }) {
   const isCompleted = task.status === 'completed';
   const isExpired = task.status === 'expired';
   const pillarCfg = PILLAR_CONFIG[task.pillarType];
@@ -95,7 +97,11 @@ function TaskRow({ task }: { task: Task }) {
         ) : isExpired ? (
           <Clock className="h-5 w-5 shrink-0 text-semantic-error" />
         ) : (
-          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-text-tertiary" />
+          <button
+            onClick={() => onComplete(task.id)}
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-text-tertiary transition-colors hover:border-accent-primary hover:bg-accent-primary/10"
+            aria-label={`Completar tarefa: ${task.title}`}
+          />
         )}
 
         {/* Content */}
@@ -137,24 +143,43 @@ function TaskRow({ task }: { task: Task }) {
 
         {/* XP */}
         <span
-          className={`ml-auto whitespace-nowrap font-mono text-sm ${
+          className={`whitespace-nowrap font-mono text-sm ${
             isCompleted ? 'text-text-tertiary' : 'text-accent-primary'
           }`}
         >
           +{task.xpReward} XP
         </span>
+
+        {/* Delete */}
+        <button
+          onClick={() => onDelete(task.id)}
+          className="shrink-0 rounded p-1 text-text-tertiary transition-colors hover:bg-semantic-error/10 hover:text-semantic-error"
+          aria-label={`Deletar tarefa: ${task.title}`}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       </div>
     </Card>
   );
 }
 
-function KanbanCard({ task }: { task: Task }) {
+function KanbanCard({ task, onComplete, onDelete }: { task: Task; onComplete: (id: string) => void; onDelete: (id: string) => void }) {
   const pillarCfg = PILLAR_CONFIG[task.pillarType];
   const diffCfg = DIFFICULTY_CONFIG[task.difficulty];
+  const isPending = task.status === 'pending';
 
   return (
     <div className="rounded-lg border border-white/6 bg-bg-secondary p-3 space-y-2">
-      <p className="text-sm font-medium">{task.title}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium">{task.title}</p>
+        <button
+          onClick={() => onDelete(task.id)}
+          className="shrink-0 rounded p-0.5 text-text-tertiary transition-colors hover:bg-semantic-error/10 hover:text-semantic-error"
+          aria-label={`Deletar tarefa: ${task.title}`}
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      </div>
       <div className="flex flex-wrap items-center gap-1">
         <Badge
           variant="pillar"
@@ -172,6 +197,14 @@ function KanbanCard({ task }: { task: Task }) {
       </div>
       <div className="flex items-center justify-between">
         <span className="font-mono text-xs text-accent-primary">+{task.xpReward} XP</span>
+        {isPending && (
+          <button
+            onClick={() => onComplete(task.id)}
+            className="rounded-md bg-accent-primary/10 px-2 py-0.5 text-[10px] font-medium text-accent-primary transition-colors hover:bg-accent-primary/20"
+          >
+            Completar
+          </button>
+        )}
       </div>
     </div>
   );
@@ -184,24 +217,32 @@ export default function TasksPage() {
   const [calMonth, setCalMonth] = useState(2); // March = 2 (0-indexed)
   const [calYear, setCalYear] = useState(2026);
 
-  // Stats
-  const pendingCount = mockTasks.filter((t) => t.status === 'pending').length;
-  const completedCount = mockTasks.filter((t) => t.status === 'completed').length;
-  const expiredCount = mockTasks.filter((t) => t.status === 'expired').length;
+  // Quick-add state
+  const [quickAddTitle, setQuickAddTitle] = useState('');
+  const [quickAddPillar, setQuickAddPillar] = useState<PillarType>('health');
+  const [quickAddDifficulty, setQuickAddDifficulty] = useState<Difficulty>('medium');
+
+  // ---- Store connections ----
+  const tasks = useTaskStore((s) => s.tasks);
+
+  // ---- Derived stats from live store data ----
+  const pendingCount = tasks.filter((t) => t.status === 'pending').length;
+  const completedCount = tasks.filter((t) => t.status === 'completed').length;
+  const expiredCount = tasks.filter((t) => t.status === 'expired').length;
   const totalFinished = completedCount + expiredCount;
   const completionRate = totalFinished > 0 ? Math.round((completedCount / totalFinished) * 100) : 0;
 
   // Filtered tasks
   const filteredTasks = useMemo(() => {
-    let tasks = [...mockTasks];
+    let result = [...tasks];
     if (pillarFilter !== 'all') {
-      tasks = tasks.filter((t) => t.pillarType === pillarFilter);
+      result = result.filter((t) => t.pillarType === pillarFilter);
     }
     if (statusFilter !== 'all') {
-      tasks = tasks.filter((t) => t.status === statusFilter);
+      result = result.filter((t) => t.status === statusFilter);
     }
-    return tasks;
-  }, [pillarFilter, statusFilter]);
+    return result;
+  }, [tasks, pillarFilter, statusFilter]);
 
   // Grouped tasks for list view
   const todayPending = filteredTasks.filter(
@@ -242,13 +283,13 @@ export default function TasksPage() {
   // Tasks by date for calendar
   const tasksByDate = useMemo(() => {
     const map: Record<string, Task[]> = {};
-    for (const t of mockTasks) {
+    for (const t of tasks) {
       const dateKey = t.dueDate ?? (t.completedAt ? t.completedAt.split('T')[0] : todayStr);
       if (!map[dateKey]) map[dateKey] = [];
       map[dateKey].push(t);
     }
     return map;
-  }, []);
+  }, [tasks]);
 
   const handlePrevMonth = () => {
     if (calMonth === 0) {
@@ -265,6 +306,38 @@ export default function TasksPage() {
       setCalYear(calYear + 1);
     } else {
       setCalMonth(calMonth + 1);
+    }
+  };
+
+  // ---- Handlers ----
+  const handleCompleteTask = (id: string) => {
+    useTaskStore.getState().completeTask(id);
+  };
+
+  const handleDeleteTask = (id: string) => {
+    useTaskStore.getState().deleteTask(id);
+  };
+
+  const handleQuickAdd = () => {
+    const title = quickAddTitle.trim();
+    if (!title) return;
+
+    const xpReward = DIFFICULTY_CONFIG[quickAddDifficulty].xp;
+
+    useTaskStore.getState().createTask({
+      title,
+      pillarType: quickAddPillar,
+      difficulty: quickAddDifficulty,
+      xpReward,
+      dueDate: todayStr,
+    });
+
+    setQuickAddTitle('');
+  };
+
+  const handleQuickAddKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleQuickAdd();
     }
   };
 
@@ -306,10 +379,40 @@ export default function TasksPage() {
           <input
             type="text"
             placeholder="Adicionar tarefa rapida..."
+            value={quickAddTitle}
+            onChange={(e) => setQuickAddTitle(e.target.value)}
+            onKeyDown={handleQuickAddKeyDown}
             className="h-10 w-full rounded-lg border border-white/10 bg-bg-input pl-9 pr-3 text-sm text-text-primary placeholder:text-text-tertiary outline-none transition-colors focus:border-accent-primary"
           />
         </div>
-        <Button variant="primary" size="sm">
+
+        {/* Pillar selector for quick add */}
+        <select
+          value={quickAddPillar}
+          onChange={(e) => setQuickAddPillar(e.target.value as PillarType)}
+          className="h-10 rounded-lg border border-white/10 bg-bg-input px-2 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary"
+        >
+          {pillars.map((p) => (
+            <option key={p} value={p}>
+              {PILLAR_CONFIG[p].label}
+            </option>
+          ))}
+        </select>
+
+        {/* Difficulty selector for quick add */}
+        <select
+          value={quickAddDifficulty}
+          onChange={(e) => setQuickAddDifficulty(e.target.value as Difficulty)}
+          className="h-10 rounded-lg border border-white/10 bg-bg-input px-2 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary"
+        >
+          {(['easy', 'medium', 'hard', 'epic'] as Difficulty[]).map((d) => (
+            <option key={d} value={d}>
+              {DIFFICULTY_CONFIG[d].label}
+            </option>
+          ))}
+        </select>
+
+        <Button variant="primary" size="sm" onClick={handleQuickAdd}>
           Adicionar
         </Button>
       </div>
@@ -406,7 +509,12 @@ export default function TasksPage() {
               </h2>
               <div className="space-y-2">
                 {group.tasks.map((task) => (
-                  <TaskRow key={task.id} task={task} />
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    onComplete={handleCompleteTask}
+                    onDelete={handleDeleteTask}
+                  />
                 ))}
               </div>
             </section>
@@ -425,7 +533,12 @@ export default function TasksPage() {
             </div>
             <div className="space-y-2">
               {kanbanPending.map((task) => (
-                <KanbanCard key={task.id} task={task} />
+                <KanbanCard
+                  key={task.id}
+                  task={task}
+                  onComplete={handleCompleteTask}
+                  onDelete={handleDeleteTask}
+                />
               ))}
             </div>
           </div>
@@ -443,7 +556,12 @@ export default function TasksPage() {
                 </div>
               )}
               {kanbanInProgress.map((task) => (
-                <KanbanCard key={task.id} task={task} />
+                <KanbanCard
+                  key={task.id}
+                  task={task}
+                  onComplete={handleCompleteTask}
+                  onDelete={handleDeleteTask}
+                />
               ))}
             </div>
           </div>
@@ -456,7 +574,12 @@ export default function TasksPage() {
             </div>
             <div className="space-y-2">
               {kanbanCompleted.map((task) => (
-                <KanbanCard key={task.id} task={task} />
+                <KanbanCard
+                  key={task.id}
+                  task={task}
+                  onComplete={handleCompleteTask}
+                  onDelete={handleDeleteTask}
+                />
               ))}
             </div>
           </div>

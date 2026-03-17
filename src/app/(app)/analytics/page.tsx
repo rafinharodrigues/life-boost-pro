@@ -1,8 +1,9 @@
+'use client';
+
 import {
   BarChart3,
   TrendingUp,
   Target,
-  Calendar,
   Zap,
   ArrowUp,
   ArrowDown,
@@ -10,18 +11,16 @@ import {
   Flame,
 } from 'lucide-react';
 import Card from '@/components/ui/card';
-import ProgressBar from '@/components/ui/progress-bar';
 import Badge from '@/components/ui/badge';
-import {
-  mockPillars,
-  mockWeeklyActivity,
-  mockHeatmap,
-  mockWeeklyXpTrend,
-  mockAchievements,
-  mockTasks,
-  mockUser,
-} from '@/lib/mock-data';
-import { PILLAR_CONFIG } from '@/types';
+import { useUserStore } from '@/store/user.store';
+import { useTaskStore } from '@/store/task.store';
+import { useAchievementStore } from '@/store/achievement.store';
+import RadarChart from '@/components/charts/radar-chart';
+import XpTrendChart from '@/components/charts/xp-trend-chart';
+import DistributionChart from '@/components/charts/distribution-chart';
+import WeeklyBars from '@/components/charts/weekly-bars';
+import ActivityHeatmap from '@/components/charts/activity-heatmap';
+import { mockWeeklyXpTrend, mockHeatmap, mockWeeklyActivity } from '@/lib/mock-data';
 import type { PillarType } from '@/types';
 
 const PILLAR_COLORS: Record<PillarType, string> = {
@@ -56,40 +55,36 @@ const insights = [
 ];
 
 export default function AnalyticsPage() {
-  // Compute max XP across all weekly trend data for scaling bars
-  const allXpValues = mockWeeklyXpTrend.flatMap((w) => [
-    w.health,
-    w.intelligence,
-    w.gold,
-    w.strength,
-  ]);
-  const maxWeeklyXp = Math.max(...allXpValues, 1);
+  const user = useUserStore((s) => s.user);
+  const pillars = useUserStore((s) => s.pillars);
+  const tasks = useTaskStore((s) => s.tasks);
+  const getUnlockedCount = useAchievementStore((s) => s.getUnlockedCount);
 
-  // Heatmap month labels
-  const heatmapMonths: { label: string; colStart: number }[] = [];
-  let lastMonth = -1;
-  mockHeatmap.forEach((day, i) => {
-    const date = new Date(day.date);
-    const month = date.getMonth();
-    if (month !== lastMonth) {
-      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      heatmapMonths.push({ label: monthNames[month], colStart: Math.floor(i / 7) });
-      lastMonth = month;
-    }
-  });
+  // KPIs calculated from stores
+  const completedTasks = tasks.filter((t) => t.status === 'completed');
+  const totalTasks = tasks.length;
+  const completedCount = completedTasks.length;
+  const totalXpFromTasks = completedTasks.reduce((sum, t) => sum + t.xpReward, 0);
+  const completionRate = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
 
-  // Organize heatmap into weeks (columns) of 7 days (rows)
-  const heatmapWeeks: (typeof mockHeatmap)[] = [];
-  for (let i = 0; i < mockHeatmap.length; i += 7) {
-    heatmapWeeks.push(mockHeatmap.slice(i, i + 7));
-  }
+  // Radar chart data from pillar levels
+  const radarData = pillars.map((p) => ({
+    pillar: PILLAR_LABELS[p.type],
+    value: p.currentLevel,
+    fullMark: 10,
+  }));
 
-  // Pillar distribution percentages
+  // Distribution data from tasks by pillar
   const pillarTaskCounts: Record<PillarType, number> = { health: 0, intelligence: 0, gold: 0, strength: 0 };
-  mockTasks.forEach((t) => {
+  tasks.forEach((t) => {
     pillarTaskCounts[t.pillarType]++;
   });
-  const totalTasks = mockTasks.length;
+
+  const distributionData = (Object.keys(pillarTaskCounts) as PillarType[]).map((p) => ({
+    name: PILLAR_LABELS[p],
+    value: pillarTaskCounts[p],
+    color: PILLAR_COLORS[p],
+  }));
 
   return (
     <div className="space-y-6">
@@ -126,9 +121,12 @@ export default function AnalyticsPage() {
               <Zap className="h-4 w-4 text-accent-primary" />
               <span className="text-xs text-text-secondary">XP Total</span>
             </div>
-            <p className="font-mono text-2xl font-bold">2.340</p>
-            <p className="text-xs text-text-tertiary">XP no periodo</p>
-            <p className="text-xs text-semantic-success">+18% ↑</p>
+            <p className="font-mono text-2xl font-bold">
+              {user.totalXp.toLocaleString('pt-BR')}
+            </p>
+            <p className="text-xs text-text-tertiary">
+              {totalXpFromTasks.toLocaleString('pt-BR')} XP de tarefas
+            </p>
           </div>
         </Card>
 
@@ -139,9 +137,10 @@ export default function AnalyticsPage() {
               <Target className="h-4 w-4 text-accent-cyan" />
               <span className="text-xs text-text-secondary">Tarefas</span>
             </div>
-            <p className="font-mono text-2xl font-bold">47</p>
-            <p className="text-xs text-text-tertiary">no periodo</p>
-            <p className="text-xs text-semantic-success">+5 vs anterior</p>
+            <p className="font-mono text-2xl font-bold">{completedCount}</p>
+            <p className="text-xs text-text-tertiary">
+              de {totalTasks} no total
+            </p>
           </div>
         </Card>
 
@@ -152,7 +151,9 @@ export default function AnalyticsPage() {
               <TrendingUp className="h-4 w-4 text-accent-primary" />
               <span className="text-xs text-text-secondary">Taxa conclusao</span>
             </div>
-            <p className="font-mono text-2xl font-bold text-accent-primary">87%</p>
+            <p className="font-mono text-2xl font-bold text-accent-primary">
+              {completionRate}%
+            </p>
             <p className="text-xs text-text-tertiary">conclusao</p>
           </div>
         </Card>
@@ -164,194 +165,24 @@ export default function AnalyticsPage() {
               <Flame className="h-4 w-4 text-accent-amber" />
               <span className="text-xs text-text-secondary">Streak</span>
             </div>
-            <p className="font-mono text-2xl font-bold">12 dias</p>
+            <p className="font-mono text-2xl font-bold">{user.streakCount} dias</p>
             <p className="text-xs text-text-tertiary">atual</p>
-            <p className="text-xs text-text-tertiary">Maior: 34</p>
+            <p className="text-xs text-text-tertiary">Maior: {user.maxStreak}</p>
           </div>
         </Card>
       </div>
 
       {/* Row 2: XP Trend Chart */}
-      <Card>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold">Evolucao de XP por Semana</h3>
-          <div className="flex items-center gap-3">
-            {(['health', 'intelligence', 'gold', 'strength'] as PillarType[]).map((p) => (
-              <div key={p} className="flex items-center gap-1.5">
-                <span
-                  className="inline-block h-2 w-2 rounded-full"
-                  style={{ backgroundColor: PILLAR_COLORS[p] }}
-                />
-                <span className="text-[10px] text-text-tertiary">{PILLAR_LABELS[p]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      <XpTrendChart data={mockWeeklyXpTrend} />
 
-        <div className="flex items-end gap-2" style={{ height: 180 }}>
-          {mockWeeklyXpTrend.map((week) => (
-            <div key={week.week} className="flex flex-1 flex-col items-center gap-1">
-              <div className="flex w-full items-end justify-center gap-[2px]" style={{ height: 150 }}>
-                {(['health', 'intelligence', 'gold', 'strength'] as PillarType[]).map((pillar) => {
-                  const val = week[pillar];
-                  const barHeight = Math.max((val / maxWeeklyXp) * 100, 3);
-                  return (
-                    <div
-                      key={pillar}
-                      className="flex-1 rounded-t transition-all"
-                      style={{
-                        height: `${barHeight}%`,
-                        backgroundColor: PILLAR_COLORS[pillar],
-                        maxWidth: 12,
-                      }}
-                    />
-                  );
-                })}
-              </div>
-              <span className="text-[10px] text-text-tertiary">{week.week}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Row 3: Two columns */}
+      {/* Row 3: Two columns — Radar + Distribution */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Left: Balance/Radar */}
-        <Card>
-          <h3 className="mb-4 text-base font-semibold">Equilibrio dos Pilares</h3>
-          <div className="space-y-3">
-            {mockPillars.map((pillar) => {
-              const percent = Math.round((pillar.currentLevel / 20) * 100);
-              return (
-                <div key={pillar.type} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-block h-2 w-2 rounded-full"
-                        style={{ backgroundColor: PILLAR_COLORS[pillar.type] }}
-                      />
-                      <span className="text-sm text-text-primary">
-                        {PILLAR_LABELS[pillar.type]}
-                      </span>
-                    </div>
-                    <span className="font-mono text-xs text-text-secondary">
-                      Nv. {pillar.currentLevel}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-white/6">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${percent}%`,
-                        backgroundColor: PILLAR_COLORS[pillar.type],
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        {/* Right: Distribution */}
-        <Card>
-          <h3 className="mb-4 text-base font-semibold">Distribuicao por Pilar</h3>
-
-          {/* Stacked bar */}
-          <div className="mb-4 flex h-4 w-full overflow-hidden rounded-full">
-            {(['health', 'intelligence', 'gold', 'strength'] as PillarType[]).map((p) => {
-              const pct = totalTasks > 0 ? (pillarTaskCounts[p] / totalTasks) * 100 : 25;
-              return (
-                <div
-                  key={p}
-                  style={{
-                    width: `${pct}%`,
-                    backgroundColor: PILLAR_COLORS[p],
-                  }}
-                />
-              );
-            })}
-          </div>
-
-          <div className="space-y-2.5">
-            {(['health', 'intelligence', 'gold', 'strength'] as PillarType[]).map((p) => {
-              const count = pillarTaskCounts[p];
-              const pct = totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
-              return (
-                <div key={p} className="flex items-center gap-3">
-                  <span
-                    className="inline-block h-3 w-3 rounded"
-                    style={{ backgroundColor: PILLAR_COLORS[p] }}
-                  />
-                  <span className="flex-1 text-sm text-text-primary">{PILLAR_LABELS[p]}</span>
-                  <span className="font-mono text-xs text-text-secondary">{count} tarefas</span>
-                  <span className="font-mono text-xs text-text-tertiary">{pct}%</span>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+        <RadarChart data={radarData} />
+        <DistributionChart data={distributionData} />
       </div>
 
       {/* Row 4: Heatmap Calendar */}
-      <Card>
-        <div className="mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-accent-primary" />
-          <h3 className="text-base font-semibold">Mapa de Atividade</h3>
-        </div>
-
-        {/* Month labels */}
-        <div className="mb-1 flex gap-[3px] pl-0">
-          {heatmapMonths.map((m, i) => (
-            <span
-              key={`${m.label}-${i}`}
-              className="text-[10px] text-text-tertiary"
-              style={{
-                marginLeft: i === 0 ? m.colStart * 15 : undefined,
-                width: i < heatmapMonths.length - 1
-                  ? (heatmapMonths[i + 1].colStart - m.colStart) * 15
-                  : undefined,
-              }}
-            >
-              {m.label}
-            </span>
-          ))}
-        </div>
-
-        {/* Heatmap grid */}
-        <div className="flex gap-[3px] overflow-x-auto pb-2">
-          {heatmapWeeks.map((week, wi) => (
-            <div key={wi} className="flex flex-col gap-[3px]">
-              {week.map((day) => {
-                let intensity = 'bg-white/4';
-                if (day.xp > 0 && day.xp <= 30) intensity = 'bg-accent-primary/20';
-                else if (day.xp > 30 && day.xp <= 80) intensity = 'bg-accent-primary/40';
-                else if (day.xp > 80 && day.xp <= 130) intensity = 'bg-accent-primary/60';
-                else if (day.xp > 130) intensity = 'bg-accent-primary/90';
-
-                return (
-                  <div
-                    key={day.date}
-                    className={`h-3 w-3 rounded-sm ${intensity}`}
-                    title={`${day.date}: ${day.xp} XP, ${day.tasks} tarefas`}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-        {/* Legend */}
-        <div className="mt-2 flex items-center gap-1 justify-end">
-          <span className="text-[10px] text-text-tertiary mr-1">Menos</span>
-          <div className="h-3 w-3 rounded-sm bg-white/4" />
-          <div className="h-3 w-3 rounded-sm bg-accent-primary/20" />
-          <div className="h-3 w-3 rounded-sm bg-accent-primary/40" />
-          <div className="h-3 w-3 rounded-sm bg-accent-primary/60" />
-          <div className="h-3 w-3 rounded-sm bg-accent-primary/90" />
-          <span className="text-[10px] text-text-tertiary ml-1">Mais</span>
-        </div>
-      </Card>
+      <ActivityHeatmap data={mockHeatmap} />
 
       {/* Row 5: AI Insights */}
       <Card className="border-accent-primary/30">

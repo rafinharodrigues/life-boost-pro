@@ -1,6 +1,9 @@
+'use client';
+
 import { MapPin } from 'lucide-react';
 import Card from '@/components/ui/card';
 import { mockRanking } from '@/lib/mock-data';
+import { useUserStore } from '@/store/user.store';
 
 const MEDAL: Record<number, string> = {
   1: '\uD83E\uDD47',
@@ -28,9 +31,12 @@ function avatarColor(index: number) {
 }
 
 const topPlayers = mockRanking.filter((r) => !r.isCurrentUser);
-const currentUser = mockRanking.find((r) => r.isCurrentUser);
+const mockCurrentUser = mockRanking.find((r) => r.isCurrentUser);
 
 export default function RankingPage() {
+  // Live data from store for the current user
+  const user = useUserStore((s) => s.user);
+
   return (
     <div className="space-y-6">
       {/* Title */}
@@ -97,8 +103,8 @@ export default function RankingPage() {
         })}
       </div>
 
-      {/* Current user (sticky-style) */}
-      {currentUser && (
+      {/* Current user (sticky-style) — uses live store data */}
+      {mockCurrentUser && (
         <div className="sticky bottom-4">
           <Card className="border-accent-primary/50 shadow-lg shadow-accent-primary/10">
             <div className="flex items-center gap-3">
@@ -109,24 +115,24 @@ export default function RankingPage() {
 
               {/* Avatar */}
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-primary text-xs font-bold text-white">
-                {currentUser.displayName.slice(0, 2).toUpperCase()}
+                {user.displayName.slice(0, 2).toUpperCase()}
               </div>
 
-              {/* Info */}
+              {/* Info — live from store */}
               <div className="flex-1">
-                <p className="text-sm font-semibold">{currentUser.displayName}</p>
+                <p className="text-sm font-semibold">{user.displayName}</p>
                 <p className="font-mono text-xs text-text-secondary">
-                  Lv. {currentUser.level}
+                  Lv. {user.currentLevel}
                 </p>
               </div>
 
-              {/* Position + XP */}
+              {/* Position + XP — live XP from store */}
               <div className="text-right">
                 <p className="font-mono text-sm font-semibold text-accent-primary">
-                  {currentUser.xpEarned.toLocaleString('pt-BR')} XP
+                  {user.totalXp.toLocaleString('pt-BR')} XP
                 </p>
                 <p className="font-mono text-xs text-text-tertiary">
-                  #{currentUser.position}
+                  #{mockCurrentUser.position}
                 </p>
               </div>
             </div>
