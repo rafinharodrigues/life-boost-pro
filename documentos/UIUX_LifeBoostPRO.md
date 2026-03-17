@@ -667,6 +667,415 @@ Top 3 com backgrounds dourado/prata/bronze sutis. Posição do usuário sempre v
 - Escala ligeiramente maior que os outros (transform: scale(1.03))
 - Glow permanente sutil no card
 
+### 4.8 Tela do Mentor IA (Chat)
+
+A interação com o Mentor é a feature mais diferenciadora do produto. O chat deve parecer uma conversa com um NPC sábio de RPG, não um chatbot corporativo.
+
+**Desktop Layout:**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  ← Voltar ao Dashboard          Mentor IA           Plano Boost │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │  HEADER DO MENTOR                                            ││
+│  │  ┌──────┐                                                    ││
+│  │  │ 🧙  │  Mentor    ● Online                                ││
+│  │  │      │  "Seu guia pessoal de evolução"                    ││
+│  │  └──────┘                                                    ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                   │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │  ÁREA DE MENSAGENS (scroll vertical)                         ││
+│  │                                                              ││
+│  │        ┌──────────────────────────────────┐                  ││
+│  │        │ Mentor:                          │                  ││
+│  │        │ "Bom dia, guerreiro! Vi que      │  ← bg-tertiary  ││
+│  │        │  seu pilar de Saúde precisa de   │    border-left   ││
+│  │        │  atenção. Que tal uma missão     │    accent-cyan   ││
+│  │        │  rápida?"                        │                  ││
+│  │        │                    14:32         │                  ││
+│  │        └──────────────────────────────────┘                  ││
+│  │                                                              ││
+│  │  ┌──────────────────────────────────┐                        ││
+│  │  │ Você:                            │                        ││
+│  │  │ "Me sugere algo leve, tô        │  ← bg-elevated        ││
+│  │  │  cansado hoje"                   │    border-left        ││
+│  │  │                    14:33         │    accent-primary     ││
+│  │  └──────────────────────────────────┘                        ││
+│  │                                                              ││
+│  │        ┌──────────────────────────────────┐                  ││
+│  │        │ Mentor:                          │                  ││
+│  │        │ "Entendido! Que tal isso:"       │                  ││
+│  │        │                                  │                  ││
+│  │        │ ┌────────────────────────────┐   │                  ││
+│  │        │ │ ♥ Caminhada leve 15min     │   │  ← Card de      ││
+│  │        │ │   Fácil • +10 XP           │   │    missão inline ││
+│  │        │ │   [Aceitar missão]         │   │                  ││
+│  │        │ └────────────────────────────┘   │                  ││
+│  │        │                    14:33         │                  ││
+│  │        └──────────────────────────────────┘                  ││
+│  │                                                              ││
+│  │        ┌─────────────────────┐                               ││
+│  │        │ ● ● ●  Digitando...│  ← Typing indicator           ││
+│  │        └─────────────────────┘                               ││
+│  │                                                              ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                   │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │  [💡 Sugestões rápidas]                                      ││
+│  │  [Como estou indo?] [Me dê uma missão] [Dicas para hoje]    ││
+│  ├──────────────────────────────────────────────────────────────┤│
+│  │  ┌────────────────────────────────────────────────┐ [Enviar] ││
+│  │  │ Digite sua mensagem...                         │    ↑     ││
+│  │  └────────────────────────────────────────────────┘  btn-sm  ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Mobile Layout (360px):**
+
+```
+┌────────────────────────────────────┐
+│  ← Voltar     Mentor IA     ⋮     │
+├────────────────────────────────────┤
+│  ┌──────┐ Mentor  ● Online        │
+│  │ 🧙  │ Nível do usuário: 12    │
+│  └──────┘                          │
+├────────────────────────────────────┤
+│                                    │
+│     ┌────────────────────────┐     │
+│     │ Mentor:                │     │
+│     │ "Bom dia, guerreiro!"  │     │
+│     │              14:32     │     │
+│     └────────────────────────┘     │
+│                                    │
+│  ┌────────────────────────┐        │
+│  │ Você:                  │        │
+│  │ "Me sugere algo leve"  │        │
+│  │              14:33     │        │
+│  └────────────────────────┘        │
+│                                    │
+│     ┌────────────────────────┐     │
+│     │ Mentor:                │     │
+│     │ "Que tal isso:"        │     │
+│     │ ┌──────────────────┐   │     │
+│     │ │♥ Caminhada 15min │   │     │
+│     │ │  Fácil • +10 XP  │   │     │
+│     │ │ [Aceitar missão] │   │     │
+│     │ └──────────────────┘   │     │
+│     │              14:33     │     │
+│     └────────────────────────┘     │
+│                                    │
+├────────────────────────────────────┤
+│ [Como estou?] [Missão] [Dicas]    │
+├────────────────────────────────────┤
+│ ┌──────────────────────────┐ [↑]  │
+│ │ Digite sua mensagem...   │      │
+│ └──────────────────────────┘      │
+└────────────────────────────────────┘
+```
+
+**Regras de design do chat:**
+
+| Propriedade | Mentor (mensagem recebida) | Usuário (mensagem enviada) |
+|-------------|---------------------------|---------------------------|
+| Alinhamento | Esquerda, max-width 80% | Direita, max-width 80% |
+| Background | `--bg-tertiary` | `--bg-elevated` |
+| Border-left | 3px `--accent-cyan` | 3px `--accent-primary` |
+| Radius | 0 12px 12px 12px | 12px 0 12px 12px |
+| Fonte do nome | `--text-small` + `--accent-cyan` | `--text-small` + `--accent-primary-light` |
+| Timestamp | `--text-tiny` + `--text-tertiary`, canto inferior direito | Idem |
+
+**Sugestões rápidas (Quick Replies):**
+- Pills horizontais scrolláveis acima do input
+- Background: `--accent-primary` 10% opacity
+- Texto: `--accent-primary-light`
+- Radius: `--radius-full`
+- Height: 32px
+- Ao clicar: preenchem o input e enviam automaticamente
+- Exemplos contextuais: "Como estou indo?", "Me dê uma missão", "Dicas para hoje", "Meu resumo semanal"
+
+**Card de missão inline (sugerida pelo Mentor no chat):**
+- Renderizado dentro da mensagem do Mentor como card interativo
+- Mesma estrutura do card de tarefa do dashboard
+- Botão "Aceitar missão" cria a tarefa diretamente (sem modal)
+- Ao aceitar: card muda para estado "Missão aceita ✓" com animação de check
+- Se o usuário rejeitar (botão "Não agora"): feedback registrado como em [UC-026]
+
+**Estados do chat:**
+
+| Estado | Visual |
+|--------|--------|
+| Chat vazio (primeiro acesso) | Mensagem de boas-vindas do Mentor + 3 sugestões rápidas |
+| Mentor digitando | 3 pontos pulsando em bubble com bg-tertiary (animation: bounce 1.4s infinite) |
+| Erro na resposta IA | Mensagem do sistema: "O Mentor não conseguiu responder. Tente novamente." + botão Retry |
+| Limite de interações | Input desabilitado, mensagem: "Seu Mentor descansa até amanhã. ⏰ Reseta em {countdown}." + CTA upgrade |
+| Plano sem acesso (Free/Starter) | Tela com preview borrado do chat + CTA "Faça upgrade para conversar com o Mentor" |
+
+**Acessibilidade do chat:**
+- `role="log"` na área de mensagens (anuncia novas mensagens para screen readers)
+- `aria-live="polite"` no typing indicator
+- Cada mensagem tem `aria-label="Mensagem do Mentor: {texto}" / "Sua mensagem: {texto}"`
+- Input com `aria-label="Enviar mensagem ao Mentor"`
+- Quick replies com `role="listbox"` e `aria-label="Sugestões rápidas"`
+
+### 4.9 Tela de Perfil e Configurações
+
+**Desktop Layout — Perfil (coluna esquerda pública + coluna direita stats):**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  Meu Perfil                                        [Editar]     │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌────────────────────────────┐  ┌───────────────────────────────┐│
+│  │  PERFIL PÚBLICO            │  │  ESTATÍSTICAS                 ││
+│  │                            │  │                               ││
+│  │  ┌────────────┐            │  │  Tarefas completadas    847  ││
+│  │  │            │            │  │  XP total          125.400  ││
+│  │  │   Avatar   │  Nível 12  │  │  Dias ativos            94  ││
+│  │  │   (120px)  │            │  │  Streak atual     🔥 12 dias ││
+│  │  │            │  @username │  │  Maior streak        34 dias ││
+│  │  └────────────┘            │  │  Conquistas         18 / 50  ││
+│  │                            │  │                               ││
+│  │  ██████████████░░░░ 78%    │  ├───────────────────────────────┤│
+│  │  3.245 / 4.200 XP         │  │  EVOLUÇÃO SEMANAL (12 sem)   ││
+│  │                            │  │                               ││
+│  │  Plano: Boost ⭐           │  │  XP por semana               ││
+│  │  Membro desde: Jan 2026   │  │  █                            ││
+│  │                            │  │  █  █     █  █               ││
+│  │  Conquistas em destaque:  │  │  █  █  █  █  █  █            ││
+│  │  [🏆] [🔥] [🧠] [⚡] [💰] │  │  █  █  █  █  █  █  █  ...   ││
+│  │                            │  │                               ││
+│  │  ┌─────────────────────┐  │  ├───────────────────────────────┤│
+│  │  │ PILARES DETALHADOS  │  │  │  DISTRIBUIÇÃO POR PILAR      ││
+│  │  │                     │  │  │                               ││
+│  │  │ ♥ Saúde     Lv. 8  │  │  │       ╭─────╮                ││
+│  │  │   ████████░░  67%   │  │  │      ╱  28%  ╲  Saúde       ││
+│  │  │                     │  │  │  ───╱─────────╲──── 31%     ││
+│  │  │ 🧠 Estudos  Lv. 14 │  │  │     ╲  22%   ╱  Estudos    ││
+│  │  │   ██████████  89%   │  │  │      ╲──19%─╱  Finanças    ││
+│  │  │                     │  │  │       ╰─────╯  Rotina       ││
+│  │  │ 💰 Finanças Lv. 10 │  │  │                               ││
+│  │  │   █████████░  72%   │  │  │                               ││
+│  │  │                     │  │  │                               ││
+│  │  │ ⚡ Rotina   Lv. 11 │  │  │                               ││
+│  │  │   █████████░  81%   │  │  │                               ││
+│  │  └─────────────────────┘  │  │                               ││
+│  └────────────────────────────┘  └───────────────────────────────┘│
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Mobile Layout — Perfil (360px):**
+
+```
+┌────────────────────────────────────┐
+│  Meu Perfil              [Editar] │
+├────────────────────────────────────┤
+│                                    │
+│        ┌────────────┐              │
+│        │   Avatar   │              │
+│        │   (80px)   │              │
+│        └────────────┘              │
+│        @username  Nível 12         │
+│    ████████████████░░░░ 78%        │
+│    3.245 / 4.200 XP               │
+│    Plano: Boost ⭐                 │
+│                                    │
+│  ┌──────┐┌──────┐┌──────┐┌──────┐ │
+│  │♥  8  ││🧠 14 ││💰 10 ││⚡ 11 │ │
+│  │██████││██████││██████││██████│ │
+│  └──────┘└──────┘└──────┘└──────┘ │
+│                                    │
+│  ── Estatísticas ──────────────── │
+│  Tarefas completadas         847  │
+│  XP total                125.400  │
+│  Streak atual          🔥 12 dias │
+│  Maior streak             34 dias │
+│  Conquistas              18 / 50  │
+│                                    │
+│  ── Atividade (12 sem) ───────── │
+│  [Gráfico de barras compacto]     │
+│                                    │
+│  ── Conquistas destaque ──────── │
+│  [🏆] [🔥] [🧠] [⚡] [💰]         │
+│                                    │
+├────────────────────────────────────┤
+│  ▣      ☐      [+]     ★      ○  │
+└────────────────────────────────────┘
+```
+
+**Desktop Layout — Configurações (sidebar tabs + painel de conteúdo):**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  Configurações                                                    │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────────────┐  ┌────────────────────────────────────────┐│
+│  │  MENU LATERAL    │  │  CONTEÚDO DA ABA SELECIONADA           ││
+│  │                  │  │                                        ││
+│  │  ▸ Perfil        │  │  ── Dados Pessoais ─────────────────  ││
+│  │    Conta         │  │                                        ││
+│  │    Avatar        │  │  Nome de exibição                      ││
+│  │    Privacidade   │  │  ┌──────────────────────────────────┐  ││
+│  │    Notificações  │  │  │ João Warrior                     │  ││
+│  │    Plano         │  │  └──────────────────────────────────┘  ││
+│  │    Idioma        │  │                                        ││
+│  │                  │  │  Email                                 ││
+│  │  ─────────────── │  │  ┌──────────────────────────────────┐  ││
+│  │                  │  │  │ joao@email.com                   │  ││
+│  │  Exportar dados  │  │  └──────────────────────────────────┘  ││
+│  │  Excluir conta   │  │  ⓘ Alterar email requer verificação   ││
+│  │                  │  │                                        ││
+│  └──────────────────┘  │  Fuso horário                          ││
+│                         │  ┌──────────────────────────────────┐  ││
+│                         │  │ America/Sao_Paulo (UTC-3)    ▾  │  ││
+│                         │  └──────────────────────────────────┘  ││
+│                         │                                        ││
+│                         │  Alterar senha                         ││
+│                         │  ┌──────────────────────────────────┐  ││
+│                         │  │ ••••••••                         │  ││
+│                         │  └──────────────────────────────────┘  ││
+│                         │  [Alterar senha →]                     ││
+│                         │                                        ││
+│                         │                       [Salvar]         ││
+│                         └────────────────────────────────────────┘│
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Abas de Configurações — Conteúdo de cada uma:**
+
+| Aba | Conteúdo |
+|-----|----------|
+| Perfil | Nome, email, fuso horário, alterar senha. Botão "Salvar" |
+| Conta | Plano atual com CTA de upgrade/downgrade, histórico de faturas (link Stripe), período de cobrança |
+| Avatar | Grid de avatares base para troca [AVT-010], preview de evolução (se plano permite), inventário de itens equipáveis [UC-042] |
+| Privacidade | Toggle "Aparecer no ranking público", link "Exportar meus dados" [LGPD], link "Excluir conta" (em `--semantic-error`) |
+| Notificações | Toggles: email de missões diárias, relatório semanal, alertas de streak, marketing. Cada toggle com descrição curta |
+| Idioma | Select de idioma (pt-BR padrão, en-US na v1.2). Aviso: "O Mentor IA responderá no idioma selecionado" |
+
+**Mobile Layout — Configurações (360px):**
+
+```
+┌────────────────────────────────────┐
+│  ← Voltar       Configurações     │
+├────────────────────────────────────┤
+│                                    │
+│  ┌──────────────────────────────┐  │
+│  │ ○ Perfil                  → │  │
+│  ├──────────────────────────────┤  │
+│  │ ○ Conta e Plano           → │  │
+│  ├──────────────────────────────┤  │
+│  │ ○ Avatar                  → │  │
+│  ├──────────────────────────────┤  │
+│  │ ○ Privacidade             → │  │
+│  ├──────────────────────────────┤  │
+│  │ ○ Notificações            → │  │
+│  ├──────────────────────────────┤  │
+│  │ ○ Idioma                  → │  │
+│  └──────────────────────────────┘  │
+│                                    │
+│  ┌──────────────────────────────┐  │
+│  │ Exportar meus dados       → │  │
+│  ├──────────────────────────────┤  │
+│  │ Excluir conta             → │  │  ← text-error
+│  └──────────────────────────────┘  │
+│                                    │
+│  Versão 1.0.0                      │
+│                                    │
+├────────────────────────────────────┤
+│  ▣      ☐      [+]     ★      ○  │
+└────────────────────────────────────┘
+```
+
+Em mobile, configurações usa padrão de lista → drill-down. Cada item abre uma tela interna com slide right. Botão "Voltar" no header retorna à lista.
+
+**Regras de UX nas configurações:**
+- Autosave em toggles (notificações, privacidade) — sem necessidade de botão "Salvar"
+- Formulários de texto (nome, email, senha) requerem botão "Salvar" explícito
+- Confirmação para ações destrutivas (excluir conta) segue [UC-006]: modal com digitação "EXCLUIR"
+- Exportar dados exibe loading state com estimativa: "Preparando seus dados... Você receberá por email."
+- "Excluir conta" sempre visível mas com destaque vermelho sutil — nunca escondido
+- Alteração de email dispara toast: "Email de verificação enviado para {novo_email}"
+
+### 4.10 Tela Admin (Painel Administrativo)
+
+Acesso exclusivo para `role=admin`. Visual funcional — prioriza densidade de dados e eficiência operacional sobre estética gamer. Usa os mesmos tokens de cor mas com layout simplificado.
+
+**Desktop Layout — Dashboard Admin:**
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  ◆ LB PRO Admin                           @admin    [Logout]    │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │ Usuários │ │ DAU      │ │ MRR      │ │ Custo IA │           │
+│  │  1.247   │ │  186     │ │R$ 8.420  │ │ R$ 342   │           │
+│  │ +12% ↑   │ │ 14.9%    │ │ +8% ↑    │ │ -3% ↓    │           │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
+│                                                                   │
+│  ┌──────────────────────────────┐ ┌──────────────────────────────┐│
+│  │  CADASTROS (últimos 30 dias) │ │  CONVERSÃO POR PLANO         ││
+│  │                              │ │                              ││
+│  │  █  █     █  █  █  █        │ │  Free     85% ██████████████ ││
+│  │  █  █  █  █  █  █  █  █    │ │  Starter   7% █              ││
+│  │  (gráfico de linha)         │ │  Boost     6% █              ││
+│  │                              │ │  Ultra     2% ░              ││
+│  └──────────────────────────────┘ └──────────────────────────────┘│
+│                                                                   │
+│  ┌──────────────────────────────┐ ┌──────────────────────────────┐│
+│  │  RETENÇÃO                    │ │  SAÚDE DO SISTEMA            ││
+│  │                              │ │                              ││
+│  │  D1:  72%  ████████████████ │ │  API Anthropic    ● Online   ││
+│  │  D7:  41%  ██████████       │ │  Supabase DB      ● Online   ││
+│  │  D30: 19%  █████            │ │  Stripe           ● Online   ││
+│  │                              │ │  Vercel           ● Online   ││
+│  │  Churn mensal: 6.2%         │ │                              ││
+│  │                              │ │  Erros (24h):     12        ││
+│  │                              │ │  Latência p95:    320ms     ││
+│  └──────────────────────────────┘ └──────────────────────────────┘│
+│                                                                   │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │  CUSTO DE IA DETALHADO (últimos 30 dias)                     ││
+│  │                                                              ││
+│  │  Total de chamadas:     14.520    |  Custo total:  R$ 342   ││
+│  │  Missões diárias:       12.100    |  Custo/user:   R$ 0,27  ││
+│  │  Relatórios semanais:    1.820    |  Cache hit:    22%      ││
+│  │  Chat Mentor:              600    |  Tokens médio: 1.240    ││
+│  │                                                              ││
+│  │  (gráfico de custo diário com linha de threshold R$50/dia)  ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Abas/Seções do Admin:**
+
+| Seção | Conteúdo | Ações |
+|-------|----------|-------|
+| Dashboard | KPIs, gráficos de cadastros/retenção/receita, saúde do sistema | Filtro por período (7d, 30d, 90d) |
+| Usuários | Tabela com busca, filtro por plano/status, sort por data/nível/XP | Ver perfil, alterar plano, ban, impersonate (com log) |
+| Finanças | MRR breakdown, churn, LTV, receita por plano, projeções | Exportar CSV |
+| IA & Custos | Chamadas por tipo, custo diário, cache hit rate, erros de API, tokens consumidos | Ajustar rate limits, toggle de fallback |
+| Conquistas | Catálogo de achievements, taxa de desbloqueio por conquista | Criar/editar conquistas, ativar/desativar |
+| Sistema | Logs de erro (Sentry summary), status de CRONs, webhooks Stripe recentes | Trigger manual de CRON, retry de webhook |
+| LGPD | Solicitações de exclusão pendentes, exportações em andamento, consentimentos | Aprovar/verificar exclusões |
+
+**Regras do painel admin:**
+- Sem bottom nav ou sidebar gamer — usa header com tabs horizontais
+- Todas as ações destrutivas (ban, delete, alterar plano) requerem confirmação com motivo
+- Impersonate (ver sistema como usuário) registra no `audit_log` com `action='ADMIN_IMPERSONATE'`
+- Dashboard auto-refresh a cada 5 minutos (polling, não real-time)
+- Mobile: tabela de usuários muda para cards empilhados com dados resumidos
+- Acesso restrito por `role=admin` no middleware + RLS policy separada
+
 ---
 
 ## 5. Micro-Interações e Animações
@@ -1103,7 +1512,132 @@ Sempre seguir esta ordem dentro de cards:
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 11.2 Diretrizes Visuais da Landing
+### 11.2 Landing Page — Mobile Layout (360px)
+
+```
+┌────────────────────────────────────┐
+│  ◆ LB PRO          [≡ Menu]       │  ← Header sticky, transparente
+├────────────────────────────────────┤
+│                                    │
+│  "Transforme sua                   │
+│   vida em um jogo."               │  ← Hero: texto empilhado
+│                                    │
+│  Evolua seu personagem             │
+│  evoluindo você mesmo.             │
+│                                    │
+│  [  Começar Grátis — é de graça  ] │  ← CTA full-width, btn-xl
+│                                    │
+│  ┌──────────────────────────────┐  │
+│  │                              │  │
+│  │    Preview do Dashboard      │  │  ← Mockup mobile, não desktop
+│  │    (screenshot real, 280px)  │  │     Borda com glow sutil
+│  │                              │  │
+│  └──────────────────────────────┘  │
+│                                    │
+├────────────────────────────────────┤
+│                                    │
+│  Por que Life Boost PRO?           │
+│                                    │
+│  ┌──────────────────────────────┐  │
+│  │ 🧙 Mentor IA Pessoal        │  │  ← Cards empilhados
+│  │ Missões personalizadas que   │  │     full-width
+│  │ se adaptam ao seu progresso  │  │     scroll vertical
+│  └──────────────────────────────┘  │
+│  ┌──────────────────────────────┐  │
+│  │ ⚔️ Gamificação Real          │  │
+│  │ XP, níveis, conquistas e     │  │
+│  │ avatar que evolui com você   │  │
+│  └──────────────────────────────┘  │
+│  ┌──────────────────────────────┐  │
+│  │ 📊 4 Pilares de Vida         │  │
+│  │ Saúde, Estudos, Finanças e   │  │
+│  │ Rotina — visão completa      │  │
+│  └──────────────────────────────┘  │
+│  ┌──────────────────────────────┐  │
+│  │ 🏆 Ranking Competitivo       │  │
+│  │ Compare seu progresso com    │  │
+│  │ outros jogadores             │  │
+│  └──────────────────────────────┘  │
+│                                    │
+├────────────────────────────────────┤
+│                                    │
+│  Como funciona?                    │
+│                                    │
+│  ① Crie seu avatar                │
+│  ┌──────────────────────────────┐  │
+│  │ [Ilustração: avatar criado]  │  │
+│  └──────────────────────────────┘  │
+│                                    │
+│  ② Complete missões               │
+│  ┌──────────────────────────────┐  │
+│  │ [Ilustração: tarefa + XP]    │  │
+│  └──────────────────────────────┘  │
+│                                    │
+│  ③ Evolua                         │
+│  ┌──────────────────────────────┐  │
+│  │ [Ilustração: level up]       │  │
+│  └──────────────────────────────┘  │
+│                                    │
+├────────────────────────────────────┤
+│                                    │
+│  "X mil jogadores já estão        │
+│   evoluindo"                       │
+│                                    │
+│  ┌──────────────────────────────┐  │
+│  │ "Finalmente um app que me    │  │  ← Depoimentos em
+│  │  motiva a ser consistente."  │  │     carousel horizontal
+│  │            — @user1          │  │     (swipe)
+│  └──────────────────────────────┘  │
+│         ● ○ ○                      │  ← Dots de paginação
+│                                    │
+├────────────────────────────────────┤
+│                                    │
+│  Pronto para começar              │
+│  sua jornada?                      │
+│                                    │
+│  [  Criar Conta Grátis           ] │  ← CTA final full-width
+│                                    │
+├────────────────────────────────────┤
+│  Termos · Privacidade · Contato   │
+│  © 2026 Life Boost PRO            │
+└────────────────────────────────────┘
+```
+
+**Adaptações mobile-specific da landing:**
+
+| Elemento | Desktop | Mobile |
+|----------|---------|--------|
+| Header | Logo + Login + CTA inline | Logo + hamburger menu (drawer) |
+| Hero texto | 1 linha grande (32px) | 2 linhas empilhadas (24px) |
+| Hero mockup | Screenshot desktop com moldura | Screenshot mobile com moldura mobile |
+| Features | Grid 2x2 ou 3x2 | Cards empilhados full-width, scroll vertical |
+| Como funciona | 3 colunas horizontal | 3 blocos empilhados vertical, numerados |
+| Social proof | Cards lado a lado | Carousel horizontal com swipe + dots |
+| Pricing | 4 cards em row | Stack vertical, Boost primeiro (antes de Starter) |
+| CTAs | Width auto | Full-width (`w-full`) para área de toque máxima |
+| Animações | Parallax no hero | Parallax desativado (performance). Fade-in on scroll mantido. |
+
+**Hamburger menu (drawer mobile):**
+```
+┌────────────────────────────────────┐
+│  ✕ Fechar                          │
+│                                    │
+│  Features                          │
+│  Como funciona                     │
+│  Pricing                           │
+│                                    │
+│  ──────────────────────────────── │
+│                                    │
+│  [Login]                           │
+│  [Começar Grátis]                  │
+│                                    │
+└────────────────────────────────────┘
+ Overlay: bg-black 70% + backdrop-blur
+ Slide-in da direita, 300ms ease-out
+ Links fazem scroll suave para a seção e fecham o drawer
+```
+
+### 11.3 Diretrizes Visuais da Landing
 
 | Regra | Detalhe |
 |-------|---------|
@@ -1165,7 +1699,241 @@ Sempre seguir esta ordem dentro de cards:
 
 ---
 
-## 13. Checklist de Qualidade por Tela
+## 13. Estratégia de Assets Visuais e Ilustrações
+
+### 13.1 Filosofia de Ilustração
+
+O Life Boost PRO precisa de assets visuais que reforcem a identidade gamer/RPG sem cair no genérico. As ilustrações devem ser consistentes entre si, funcionar sobre fundos escuros e ter um estilo único reconhecível.
+
+**Estilo visual:** Flat ilustrativo com detalhes de linhas finas (line art) e acentos neon. Não é pixel art (diferencial vs Habitica), não é 3D realista (pesado demais), não é cartoon infantil (público é 18-35). Referências: ilustrações de games indie + estética cyberpunk suavizada.
+
+### 13.2 Catálogo de Assets Necessários
+
+#### Avatares Base (MVP — Prioridade P0)
+
+| ID | Descrição | Estilo | Formato | Tamanhos |
+|----|-----------|--------|---------|----------|
+| AVT-BASE-01 | Guerreiro/Cavaleiro | Armadura leve, postura confiante | SVG | 64px, 80px, 120px, 240px |
+| AVT-BASE-02 | Mago/Feiticeiro | Manto, cajado/orbe, aura mística | SVG | Idem |
+| AVT-BASE-03 | Arqueiro/Ranger | Arco, capa, visual ágil | SVG | Idem |
+| AVT-BASE-04 | Ninja/Assassino | Visual furtivo, máscara, dual blades | SVG | Idem |
+| AVT-BASE-05 | Curandeiro/Clérigo | Vestes claras, símbolo de cura | SVG | Idem |
+| AVT-BASE-06 | Técnico/Engenheiro | Armadura tech, gadgets, visual moderno | SVG | Idem |
+| AVT-BASE-07 | Samurai | Katana, armadura japonesa estilizada | SVG | Idem |
+| AVT-BASE-08 | Druida | Elementos naturais, bastão, animal companion | SVG | Idem |
+
+**Especificações de cada avatar:**
+- Fundo transparente (mandatory)
+- Paleta limitada: 4-5 cores por avatar + preto/branco
+- Cada avatar deve ter cores que remetem a pelo menos 1 pilar (ex: Curandeiro = verde/saúde, Técnico = ciano/estudos)
+- Proporção: busto e rosto visíveis em 64px, corpo inteiro em 120px+
+- Expressão: determinada/confiante (nunca agressiva ou triste)
+- Outline sutil de 1px para contraste sobre qualquer fundo escuro
+
+**Estágios de evolução (v1.1):**
+- Cada avatar base tem 6 estágios visuais: Nível 1 (base), 10, 25, 50, 75, 100
+- Evolução é aditiva (mais detalhes, mais glow, mais equipamentos), nunca subtrativa
+- Estágio 1: silhueta simples com cores base
+- Estágio 2 (Nv.10): adição de acessório sutil (capa, braçadeira)
+- Estágio 3 (Nv.25): armadura/vestes melhoradas, detalhes luminosos
+- Estágio 4 (Nv.50): efeito de aura sutil (glow na cor principal)
+- Estágio 5 (Nv.75): equipamento épico, partículas visuais
+- Estágio 6 (Nv.100): forma final, aura completa, visual lendário
+
+#### Ícones de Pilar (MVP — Prioridade P0)
+
+| Pilar | Ícone | Cor | Variantes |
+|-------|-------|-----|-----------|
+| Saúde | Coração com pulso (heartbeat) | `--pillar-health` #00E676 | 16px, 20px, 24px, 32px — outlined + filled |
+| Estudos | Livro aberto com estrela | `--pillar-intelligence` #00D2FF | Idem |
+| Finanças | Moeda/coin com brilho | `--pillar-gold` #FFAB00 | Idem |
+| Rotina | Relógio com checkmark | `--pillar-strength` #6C5CE7 | Idem |
+
+Formato: SVG inline (importados como React components). Stroke width: 1.5px (consistente com Lucide).
+
+#### Badges de Conquistas (MVP — Prioridade P1)
+
+| Conquista | Visual do Badge | Formato |
+|-----------|----------------|---------|
+| Primeiro Passo | Pegada brilhante | SVG 48px × 48px |
+| Uma Semana Forte | Fogo com "7" | SVG 48px × 48px |
+| Mês de Ferro | Escudo com "30" | SVG 48px × 48px |
+| Aprendiz (Nv.5) | Estrela bronze | SVG 48px × 48px |
+| Guerreiro (Nv.10) | Espada cruzada | SVG 48px × 48px |
+| Veterano (Nv.25) | Coroa simples | SVG 48px × 48px |
+| Corpo São (Saúde 10) | Coração com asas | SVG 48px × 48px |
+| Mente Afiada (INT 10) | Cérebro brilhante | SVG 48px × 48px |
+| Cofre Cheio (GOLD 10) | Baú de tesouro | SVG 48px × 48px |
+| Disciplinado (STR 10) | Ampulheta mágica | SVG 48px × 48px |
+| Dia Perfeito | Sol radiante | SVG 48px × 48px |
+| Centurião (100 tarefas) | Escudo romano | SVG 48px × 48px |
+| Lenda (500 tarefas) | Troféu dourado | SVG 48px × 48px |
+| Discípulo (10 missões IA) | Pergaminho mágico | SVG 48px × 48px |
+| Secreto 01 | Lua com estrela | SVG 48px × 48px |
+
+**Especificações dos badges:**
+- 3 estados visuais: desbloqueado (colorido + glow), progresso parcial (colorido + opacity 60%), bloqueado (monocromático cinza)
+- Badges secretos quando bloqueados: silhueta de "?" com fundo `--bg-tertiary`
+- Cada badge cabe em um container de 48px × 48px com 4px de padding interno
+- Cores devem remeter à categoria (streak=âmbar/fogo, pilar=cor do pilar, marco=roxo/primary)
+
+#### Ilustrações de Empty States (MVP — Prioridade P1)
+
+| Tela | Ilustração | Descrição Visual | Tamanho |
+|------|-----------|-----------------|---------|
+| Dashboard sem tarefas | Avatar dormindo | Avatar do usuário (ou genérico) sentado/dormindo com "zzZ", tom relaxado não triste | 200px × 160px |
+| Conquistas vazio | Baú de tesouro fechado | Baú fechado com brilho sutil saindo pelas frestas, atmosfera de mistério | 200px × 160px |
+| Ranking sem posição | Pódio vazio | 3 pódios (#1, #2, #3) vazios com spotlight, convidando a ocupar | 200px × 160px |
+| Busca sem resultado | Lupa com interrogação | Lupa grande com "?" no centro, linhas pontilhadas ao redor | 160px × 160px |
+| Chat do Mentor vazio | Mentor acenando | Figura do Mentor com balão de fala vazio, convidativo | 200px × 160px |
+| Primeira vez em tarefas | Espada fincada em pedra | Referência Excalibur — "Sua primeira missão espera por você" | 200px × 160px |
+| Sem conquistas na semana | Mapa enrolado | Mapa de aventura enrolado com selo, "Novas conquistas te aguardam" | 160px × 160px |
+| Erro de conexão | Cristal partido | Cristal mágico com rachadura, visual de "link quebrado" tematizado | 160px × 160px |
+
+**Especificações dos empty states:**
+- Paleta monocromática com 1 cor de acento (a cor relevante da seção)
+- Opacity geral reduzida (70-80%) para não competir com a mensagem de texto
+- Sem personagens detalhados (custos) — siluetas e objetos icônicos
+- Fundo transparente, funciona sobre `--bg-primary` e `--bg-secondary`
+- Formato: SVG preferido (escala infinita). PNG com @2x se SVG muito complexo.
+
+#### Ilustrações do Onboarding (MVP — Prioridade P1)
+
+| Tela | Ilustração | Descrição |
+|------|-----------|-----------|
+| Tela 1 — Boas-vindas | Skyline de cidade fantasia | Cidade estilizada com silhueta de herói olhando para ela. Transmite início de jornada. Cores: gradiente escuro com acentos neon. |
+| Tela 2 — Perfil | Escudo com espaço para nome | Escudo/banner de guilda com espaço visual onde o nome do usuário será exibido. |
+| Tela 3 — Avatar | (Grid de avatares reais) | Sem ilustração extra — o próprio grid de avatares selecionáveis é o visual. Background com partículas sutis. |
+| Tela 4 — Prioridades | 4 pilares como cristais/gemas | 4 cristais nas cores dos pilares, dispostos em losango. Ao selecionar, o cristal "acende". |
+| Tela 5 — Resumo/Criação | Explosão de partículas | Animação de "personagem sendo criado" — partículas convergem para o centro formando o avatar. |
+
+#### Ilustrações da Landing Page (MVP — Prioridade P1)
+
+| Seção | Visual | Descrição |
+|-------|--------|-----------|
+| Hero | Mockup do dashboard | Screenshot real envolto em moldura de device com glow `--accent-primary`. Desktop: moldura laptop. Mobile: moldura phone. |
+| Features | Ícones de feature | 4-6 ícones grandes (48px) em estilo consistente com ícones de pilar. Não são os mesmos — são conceitos (IA, Gamificação, etc). |
+| Como funciona | 3 ilustrações sequenciais | Mesmo estilo das ilustrações de onboarding, versão compacta (160px × 120px). 1: Avatar → 2: Tarefa + XP → 3: Level up |
+| Social proof | Avatares genéricos | Circular, 40px, mostram variedade dos avatares base disponíveis |
+
+### 13.3 Pipeline de Produção de Assets
+
+| Fase | Ação | Responsável | Formato de Entrega |
+|------|------|-------------|-------------------|
+| 1. Briefing | Documento com descrição, referências, paleta e tamanhos | UX Designer | Markdown (este documento) |
+| 2. Sketch | Rascunho preto e branco das ilustrações para aprovação | Ilustrador / IA generativa | PNG draft |
+| 3. Produção | Versão final em alta qualidade | Ilustrador / IA generativa + refinamento manual | SVG (vetorial) |
+| 4. Otimização | Compressão, limpeza de paths, remoção de metadados | Dev frontend | SVG otimizado (SVGO) |
+| 5. Integração | Importação como React components ou arquivos em `public/` | Dev frontend | `.tsx` ou `.svg` |
+
+**Opções de produção de assets:**
+
+| Método | Custo | Qualidade | Consistência | Recomendação |
+|--------|-------|-----------|-------------|-------------|
+| Ilustrador freelance (Fiverr/99designs) | R$ 500-2.000 para pack completo | Alta | Alta (mesmo artista) | Melhor para avatares e badges |
+| IA generativa (Midjourney/DALL-E) + edição | R$ 0-100 (subscrição) | Média-alta | Média (precisa de curadoria e edição para manter coerência) | Bom para empty states e ilustrações de landing |
+| Bibliotecas open-source (unDraw, Humaaans) | R$ 0 | Média | Alta (mesmo estilo) | Aceitável para MVP rápido, mas estilo genérico |
+| SVG inline customizado (código manual) | R$ 0 (tempo de dev) | Variável | Alta | Melhor para ícones e badges simples |
+
+**Recomendação para MVP:** Combinação de métodos. Avatares via ilustrador freelance (são o coração visual do produto). Badges e ícones via SVG manual. Empty states e onboarding via IA generativa + edição. Landing page usa screenshots reais + ícones SVG.
+
+### 13.4 Organização dos Assets no Projeto
+
+```
+public/
+├── avatars/
+│   ├── base/
+│   │   ├── warrior.svg
+│   │   ├── mage.svg
+│   │   ├── archer.svg
+│   │   ├── ninja.svg
+│   │   ├── healer.svg
+│   │   ├── engineer.svg
+│   │   ├── samurai.svg
+│   │   └── druid.svg
+│   └── evolved/             # v1.1
+│       ├── warrior-stage-2.svg
+│       ├── warrior-stage-3.svg
+│       └── ...
+│
+├── badges/
+│   ├── first-task.svg
+│   ├── streak-7.svg
+│   ├── streak-30.svg
+│   ├── level-5.svg
+│   ├── level-10.svg
+│   ├── level-25.svg
+│   ├── health-10.svg
+│   ├── intelligence-10.svg
+│   ├── gold-10.svg
+│   ├── strength-10.svg
+│   ├── daily-clear.svg
+│   ├── tasks-100.svg
+│   ├── tasks-500.svg
+│   ├── ai-disciple.svg
+│   └── secret-01.svg
+│
+├── illustrations/
+│   ├── empty-states/
+│   │   ├── avatar-sleeping.svg
+│   │   ├── treasure-chest.svg
+│   │   ├── empty-podium.svg
+│   │   ├── search-not-found.svg
+│   │   ├── mentor-waving.svg
+│   │   ├── sword-in-stone.svg
+│   │   ├── rolled-map.svg
+│   │   └── broken-crystal.svg
+│   │
+│   ├── onboarding/
+│   │   ├── fantasy-skyline.svg
+│   │   ├── guild-shield.svg
+│   │   ├── pillar-crystals.svg
+│   │   └── creation-particles.json  # Lottie animation
+│   │
+│   └── landing/
+│       ├── feature-ai.svg
+│       ├── feature-gamification.svg
+│       ├── feature-pillars.svg
+│       ├── feature-ranking.svg
+│       ├── step-create.svg
+│       ├── step-complete.svg
+│       └── step-evolve.svg
+│
+├── icons/
+│   ├── pillar-health.svg
+│   ├── pillar-intelligence.svg
+│   ├── pillar-gold.svg
+│   └── pillar-strength.svg
+│
+└── og/
+    ├── og-default.png        # 1200×630px Open Graph
+    ├── og-pricing.png
+    └── og-share-card.png     # Card para compartilhar progresso
+```
+
+**Regras de nomeação:**
+- kebab-case para todos os arquivos
+- Prefixo por tipo quando relevante: `pillar-`, `badge-`, `empty-`
+- SVGs devem ter `viewBox` definido e sem width/height hardcoded (responsivo via CSS)
+- Tamanho máximo por SVG: 15KB (otimizado com SVGO)
+- PNGs apenas quando necessário (Open Graph, mockups): max 200KB, @2x resolution
+
+### 13.5 Mentor IA — Identidade Visual
+
+O Mentor precisa de uma identidade visual própria para não ser apenas "um ícone de chat".
+
+| Aspecto | Definição |
+|---------|-----------|
+| Aparência | Figura sábia de RPG — mago/sábio com capuz e orbe luminoso. Não é um avatar jogável — é um NPC. |
+| Expressão | Calma, sábia, levemente misteriosa. Nunca sorridente demais (não é mascote infantil). |
+| Cor dominante | `--accent-cyan` — distingue visualmente dos avatares dos jogadores (que usam todas as cores) |
+| Tamanhos necessários | 24px (inline no chat), 40px (header do chat), 80px (tela de boas-vindas do chat), 120px (onboarding) |
+| Animações | Orbe na mão pulsa sutilmente (CSS animation: glow 3s infinite). No typing indicator, 3 pontos flutuam sobre o orbe. |
+| Consistência | O mesmo design do Mentor aparece em: chat, notificações do dashboard, relatório semanal, onboarding, alertas proativos |
+
+---
+
+## 14. Checklist de Qualidade por Tela
 
 Antes de considerar qualquer tela como "pronta", validar:
 
